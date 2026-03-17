@@ -1,0 +1,14 @@
+{
+  "name": "eat-what",
+  "version": "1.0.0",
+  "description": "今天吃什么 - AI菜单生成器",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "openai": "^4.70.0",
+    "dotenv": "^16.4.0"
+  }
+}

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1小时快手菜单生成器</title>
+    <style>
+        body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h1 { color: #e63946; text-align: center; font-size: 1.5rem; margin-bottom: 1.5rem; }
+        .input-group { margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; }
+        input { width: 60px; padding: 5px; border: 1px solid #ddd; border-radius: 5px; text-align: center; }
+        button { width: 100%; background: #e63946; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #d62828; }
+        #result { margin-top: 20px; border-top: 2px dashed #eee; padding-top: 15px; }
+        .dish-item { background: #fefae0; margin: 5px 0; padding: 8px; border-radius: 5px; border-left: 4px solid #dda15e; font-weight: bold; }
+        .timeline { font-size: 0.85rem; color: #666; background: #f1faee; padding: 10px; border-radius: 5px; margin-top: 15px; line-height: 1.6; }
+        .timeline b { color: #1d3557; }
+        .ai-section { margin-top: 15px; background: linear-gradient(135deg, #f1faee, #e8f4f8); padding: 15px; border-radius: 8px; border-left: 4px solid #457b9d; line-height: 1.8; font-size: 0.9rem; }
+        .ai-section b { color: #1d3557; }
+        .loading { text-align: center; color: #888; padding: 20px; }
+        .loading::after { content: ''; display: inline-block; width: 16px; height: 16px; border: 2px solid #e63946; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error { color: #e63946; background: #ffe5e5; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 0.85rem; }
+        .btn-group { display: flex; gap: 8px; }
+        .btn-ai { background: #457b9d; }
+        .btn-ai:hover { background: #1d3557; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>🍳 私人定制：今日抽签</h1>
+    
+    <div class="input-group">
+        <span>几道菜？(建议1-4)</span>
+        <input type="number" id="dishCount" value="3" min="1" max="10">
+    </div>
+    <div class="input-group">
+        <span>几道汤？</span>
+        <input type="number" id="soupCount" value="1" min="0" max="5">
+    </div>
+    <div class="input-group">
+        <span>几个人吃？</span>
+        <input type="number" id="peopleCount" value="2" min="1" max="20">
+    </div>
+    
+    <button onclick="generateMenu()">帮我做决定！</button>
+
+    <div id="result" style="display:none;">
+        <div id="dishList"></div>
+        <div class="timeline" id="timeLine"></div>
+        <div class="btn-group">
+            <button class="btn-ai" onclick="askAI()">🤖 AI帮我规划出餐</button>
+        </div>
+        <div id="aiResult"></div>
+    </div>
+</div>
+
+<script>
+// 保存当前选中的菜和汤
+let currentDishes = [];
+let currentSoups = [];
+
+// 菜单数据库分类
+const MENU = {
+    hard: ["清炖狮子头","红烧狮子头","红烧肉","坛子肉","虎皮扣肉","东坡肉","梅菜扣肉","粉蒸肉","酱肘子","红烧蹄膀","扒肘子","红烧牛肉","大盘鸡","汽锅鸡","佛跳墙（大师版）","干烧大黄鱼","松鼠桂鱼","葱烧海参","扒原壳鲍鱼"],
+    fastMeat: ["酱爆鸡丁","宫保鸡丁","鱼香肉丝","京酱肉丝","蒜泥白肉","回锅肉","水煮肉片","锅包肉","糖醋里脊","干炸里脊","熘肝尖","葱爆羊肉","水煮牛肉","葱爆牛肉","辣子鸡","白斩鸡","糟溜鱼片","清蒸鱼","赛螃蟹","炸烹虾段","软炸虾仁","宫保虾球","油焖大虾","蒜蓉粉丝蒸扇贝"],
+    veg: ["麻婆豆腐","锅塌豆腐","家常豆腐","蟹黄豆腐","地三鲜","醋溜土豆丝","干煸豆角","蒜泥茄子","烧茄子","鱼香茄子","炒合菜","虎皮尖椒","上汤娃娃菜","冬笋炒肉"],
+    cold: ["老北京芥末墩","老虎菜","拌花菜","五香花生米","拍黄瓜","拌什锦"],
+    soup: ["乌鱼蛋汤","酸辣汤","冬瓜丸子汤","胡辣汤","腌笃鲜"]
+};
+
+function generateMenu() {
+    const dCount = parseInt(document.getElementById('dishCount').value);
+    const sCount = parseInt(document.getElementById('soupCount').value);
+    
+    let selectedDishes = [];
+    
+    // 逻辑：如果选多道菜，第1道优先选“大菜/硬菜”或“硬肉菜”
+    if (dCount >= 1) {
+        let pool = MENU.hard.concat(MENU.fastMeat);
+        selectedDishes.push(pool[Math.floor(Math.random() * pool.length)]);
+    }
+    
+    // 剩下的菜从快手肉、素菜、凉菜里随机
+    if (dCount > 1) {
+        let pool = MENU.fastMeat.concat(MENU.veg).concat(MENU.cold);
+        for(let i=0; i < dCount-1; i++) {
+            let pick = pool[Math.floor(Math.random() * pool.length)];
+            if(!selectedDishes.includes(pick)) {
+                selectedDishes.push(pick);
+            } else { i--; } // 避免重复
+        }
+    }
+
+    // 选汤
+    let selectedSoups = [];
+    for(let i=0; i < sCount; i++) {
+        let pick = MENU.soup[Math.floor(Math.random() * MENU.soup.length)];
+        selectedSoups.push(pick);
+    }
+
+    // 保存到全局变量供AI使用
+    currentDishes = selectedDishes;
+    currentSoups = selectedSoups;
+
+    // 渲染结果
+    const dishListDiv = document.getElementById('dishList');
+    dishListDiv.innerHTML = "<strong>今日菜单：</strong>";
+    selectedDishes.forEach(d => {
+        dishListDiv.innerHTML += `<div class="dish-item">🍛 ${d}</div>`;
+    });
+    selectedSoups.forEach(s => {
+        dishListDiv.innerHTML += `<div class="dish-item" style="border-left-color:#457b9d">🥣 ${s}</div>`;
+    });
+
+    // 生成1小时逻辑
+    const timeLineDiv = document.getElementById('timeLine');
+    timeLineDiv.innerHTML = `
+        <b>⏳ 1小时出餐策略：</b><br>
+        1. <b>[0-15min]</b> 集中处理：一次性把${selectedDishes.length}菜${sCount}汤的葱姜蒜切好，肉和菜分类备齐。<br>
+        2. <b>[15min]</b> 启动：如果是炖/蒸菜，立刻上火；如果是炒菜，先腌制肉类。<br>
+        3. <b>[35-55min]</b> 连炒：先炒素菜再炒肉，最后做${selectedSoups[0] || '热菜'}。<br>
+        4. <b>[60min]</b> 准时开饭！
+    `;
+    
+    document.getElementById('result').style.display = 'block';
+    document.getElementById('aiResult').innerHTML = '';
+}
+
+async function askAI() {
+    const aiDiv = document.getElementById('aiResult');
+    aiDiv.innerHTML = '<div class="loading">AI 正在规划出餐方案…</div>';
+
+    try {
+        const resp = await fetch('/api/cooking-plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dishes: currentDishes, soups: currentSoups, people: parseInt(document.getElementById('peopleCount').value) })
+        });
+
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.error || `请求失败 (${resp.status})`);
+        }
+
+        const data = await resp.json();
+        aiDiv.innerHTML = `<div class="ai-section">${data.plan}</div>`;
+    } catch (e) {
+        aiDiv.innerHTML = `<div class="error">⚠️ ${e.message}</div>`;
+    }
+}
+</script>
+
+</body>
+</html>
