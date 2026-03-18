@@ -213,8 +213,87 @@ async function askAI() {
   }
 }
 
+// ===== Milk Tea Raffle =====
+function generateTea() {
+  const count = parseInt($('teaPeople').value);
+  const teaMenu = MENU_DB['奶茶甜品'];
+  const pool = [...teaMenu.cold, ...teaMenu.hard, ...teaMenu.fastMeat, ...teaMenu.veg, ...teaMenu.soup].filter(d => d.name);
+
+  const teaListDiv = $('teaList');
+  teaListDiv.innerHTML = '<strong>🧋 今日奶茶：</strong>';
+
+  const used = new Set();
+  for (let i = 0; i < count; i++) {
+    let pick;
+    let attempts = 0;
+    do {
+      pick = pool[Math.floor(Math.random() * pool.length)];
+      attempts++;
+    } while (used.has(pick.name) && attempts < 50);
+    used.add(pick.name);
+
+    teaListDiv.innerHTML += `<div class="tea-item">
+      <span class="tea-person">#${i + 1}</span>
+      <span class="tea-drink">${pick.name}</span>
+      <span class="tea-time">⏱${pick.time}min</span>
+    </div>`;
+  }
+
+  $('teaResult').style.display = 'block';
+  $('teaBtn').textContent = '🔄 再来一轮！';
+  $('teaAiResult').innerHTML = '';
+}
+
+// ===== Tea AI =====
+let currentTeaDrinks = [];
+
+function generateTeaWithTracking() {
+  generateTea();
+  // Collect current drinks from DOM
+  currentTeaDrinks = Array.from(document.querySelectorAll('#teaList .tea-drink')).map(el => el.textContent);
+}
+
+async function askTeaAI() {
+  const aiDiv = $('teaAiResult');
+  aiDiv.innerHTML = '<div class="loading">AI 正在生成奶茶教程…</div>';
+
+  try {
+    const resp = await fetch('/api/cooking-plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        dishes: currentTeaDrinks,
+        soups: [],
+        people: parseInt($('teaPeople').value),
+        mode: 'tea'
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || `请求失败 (${resp.status})`);
+    }
+
+    const data = await resp.json();
+    aiDiv.innerHTML = `<div class="ai-section">${data.plan}</div>`;
+  } catch (e) {
+    aiDiv.innerHTML = `<div class="error">⚠️ ${e.message}</div>`;
+  }
+}
+
+// ===== Tab switching =====
+function switchTab(tabName) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `tab-${tabName}`));
+}
+
 // ===== Event binding =====
 document.addEventListener('DOMContentLoaded', () => {
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  });
+
   $('menuSources').addEventListener('change', updateChipStates);
   $('selectAllBtn').addEventListener('click', () => {
     document.querySelectorAll('#menuSources input[type="checkbox"]').forEach(cb => cb.checked = true);
@@ -226,6 +305,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   $('generateBtn').addEventListener('click', generateMenu);
   $('aiBtn').addEventListener('click', askAI);
+  $('teaBtn').addEventListener('click', generateTeaWithTracking);
+  $('teaAiBtn').addEventListener('click', askTeaAI);
 
   // Delegate lock button clicks
   $('dishList').addEventListener('click', (e) => {

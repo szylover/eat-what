@@ -1,5 +1,5 @@
 module.exports = async function (context, req) {
-  const { dishes, soups, people } = req.body || {};
+  const { dishes, soups, people, mode } = req.body || {};
   const peopleCount = parseInt(people) || 2;
 
   if (!Array.isArray(dishes) || !Array.isArray(soups)) {
@@ -13,7 +13,18 @@ module.exports = async function (context, req) {
     return;
   }
 
-  const prompt = `你是一位经验丰富的厨师和厨房时间管理专家。
+  const prompt = mode === 'tea'
+    ? `你是一位专业奶茶店调饮师。
+用户今天要做以下饮品（${peopleCount}人份）：
+${dishes.join("、")}
+
+请给出：
+1. 材料清单：每款饮品需要什么材料，具体用量（按${peopleCount}人份，标注ml/g/个等）
+2. 每款饮品的详细制作步骤（泡茶时间、水温、调配比例、分层技巧等）
+3. 小贴士（如何做出奶茶店的口感，比如糖量调节、冰块用量、奶盖打发技巧等）
+
+用简洁生动的中文回答，适当加emoji。用HTML格式输出，不要用markdown。`
+    : `你是一位经验丰富的厨师和厨房时间管理专家。
 用户今天要做以下菜品（${peopleCount}人份）：
 菜：${dishes.join("、") || "无"}
 汤：${soups.join("、") || "无"}
@@ -21,9 +32,9 @@ module.exports = async function (context, req) {
 请给出：
 1. 采购清单：每道菜需要买什么食材，具体用量（按${peopleCount}人份计算，标注克数/个数/勺数等）
 2. 每道菜的简短烹饪要点（2-3句话，突出关键调味和火候）
-3. 一个合理的1小时出餐时间线，精确到分钟段，考虑并行操作（比如炖煮的同时切配其他菜）
+3. 一个合理的1小时出餐时间线，精确到分钟段，考虑并行操作
 
-用简洁生动的中文回答，适当加emoji。用HTML格式输出（可以用<b>、<br>、<div>等标签），不要用markdown。`;
+用简洁生动的中文回答，适当加emoji。用HTML格式输出，不要用markdown。`;
 
   const apiUrl = process.env.AZURE_OPENAI_ENDPOINT;
   const apiKey = process.env.AZURE_OPENAI_API_KEY;

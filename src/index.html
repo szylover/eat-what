@@ -12,49 +12,70 @@
 <body>
 
 <div class="card">
-  <h1>🍳 私人定制：今日抽签</h1>
-
-  <div class="source-group">
-    <span>菜单来源（可多选）</span>
-    <div class="source-checks" id="menuSources">
-      <label class="source-chip checked" data-source="老饭骨"><input type="checkbox" value="老饭骨" checked>👨‍🍳 老饭骨</label>
-      <label class="source-chip" data-source="家常菜"><input type="checkbox" value="家常菜">🏠 家常菜</label>
-      <label class="source-chip" data-source="川湘菜"><input type="checkbox" value="川湘菜">🌶️ 川湘菜</label>
-      <label class="source-chip" data-source="粤菜"><input type="checkbox" value="粤菜">🥡 粤菜</label>
-      <label class="source-chip" data-source="日料"><input type="checkbox" value="日料">🍣 日料</label>
-      <label class="source-chip" data-source="韩餐"><input type="checkbox" value="韩餐">🥘 韩餐</label>
-      <label class="source-chip" data-source="西餐"><input type="checkbox" value="西餐">🥩 西餐</label>
-      <label class="source-chip" data-source="东南亚"><input type="checkbox" value="东南亚">🌴 东南亚</label>
-      <label class="source-chip" data-source="海鲜"><input type="checkbox" value="海鲜">🧞 海鲜</label>
-      <label class="source-chip" data-source="奶茶甜品"><input type="checkbox" value="奶茶甜品">🧁 奶茶甜品</label>
-    </div>
-    <div class="source-actions">
-      <button class="chip-btn" id="selectAllBtn">全选</button>
-      <button class="chip-btn" id="clearAllBtn">清空</button>
-    </div>
-  </div>
-  <div class="input-group">
-    <span>几道菜？(建议1-4)</span>
-    <input type="number" id="dishCount" value="3" min="1" max="10">
-  </div>
-  <div class="input-group">
-    <span>几道汤？</span>
-    <input type="number" id="soupCount" value="1" min="0" max="5">
-  </div>
-  <div class="input-group">
-    <span>几个人吃？</span>
-    <input type="number" id="peopleCount" value="2" min="1" max="20">
+  <div class="tabs">
+    <button class="tab active" data-tab="food">🍳 今天吃什么</button>
+    <button class="tab" data-tab="tea">🧁 奶茶抽签</button>
   </div>
 
-  <button id="generateBtn">🎲 开抽！</button>
-
-  <div id="result" style="display:none;">
-    <div id="dishList"></div>
-    <div id="totalTime"></div>
-    <div class="btn-group">
-      <button class="btn-ai" id="aiBtn">🤖 AI帮我规划出餐</button>
+  <!-- ===== 吃饭 Tab ===== -->
+  <div class="tab-content active" id="tab-food">
+    <div class="source-group">
+      <span>菜单来源（可多选）</span>
+      <div class="source-checks" id="menuSources">
+        <label class="source-chip checked" data-source="老饭骨"><input type="checkbox" value="老饭骨" checked>👨‍🍳 老饭骨</label>
+        <label class="source-chip" data-source="家常菜"><input type="checkbox" value="家常菜">🏠 家常菜</label>
+        <label class="source-chip" data-source="川湘菜"><input type="checkbox" value="川湘菜">🌶️ 川湘菜</label>
+        <label class="source-chip" data-source="粤菜"><input type="checkbox" value="粤菜">🥡 粤菜</label>
+        <label class="source-chip" data-source="日料"><input type="checkbox" value="日料">🍣 日料</label>
+        <label class="source-chip" data-source="韩餐"><input type="checkbox" value="韩餐">🥘 韩餐</label>
+        <label class="source-chip" data-source="西餐"><input type="checkbox" value="西餐">🥩 西餐</label>
+        <label class="source-chip" data-source="东南亚"><input type="checkbox" value="东南亚">🌴 东南亚</label>
+        <label class="source-chip" data-source="海鲜"><input type="checkbox" value="海鲜">🧞 海鲜</label>
+      </div>
+      <div class="source-actions">
+        <button class="chip-btn" id="selectAllBtn">全选</button>
+        <button class="chip-btn" id="clearAllBtn">清空</button>
+      </div>
     </div>
-    <div id="aiResult"></div>
+    <div class="input-group">
+      <span>几道菜？(建议1-4)</span>
+      <input type="number" id="dishCount" value="3" min="1" max="10">
+    </div>
+    <div class="input-group">
+      <span>几道汤？</span>
+      <input type="number" id="soupCount" value="1" min="0" max="5">
+    </div>
+    <div class="input-group">
+      <span>几个人吃？</span>
+      <input type="number" id="peopleCount" value="2" min="1" max="20">
+    </div>
+
+    <button id="generateBtn">🎲 开抽！</button>
+
+    <div id="result" style="display:none;">
+      <div id="dishList"></div>
+      <div id="totalTime"></div>
+      <div class="btn-group">
+        <button class="btn-ai" id="aiBtn">🤖 AI帮我规划出餐</button>
+      </div>
+      <div id="aiResult"></div>
+    </div>
+  </div>
+
+  <!-- ===== 奶茶 Tab ===== -->
+  <div class="tab-content" id="tab-tea">
+    <div class="input-group">
+      <span>几个人喝？</span>
+      <input type="number" id="teaPeople" value="2" min="1" max="10">
+    </div>
+    <button class="tea-btn" id="teaBtn">🎰 开抽奶茶！</button>
+    <div id="teaResult" style="display:none;">
+      <div id="teaList"></div>
+      <div class="btn-group">
+        <button class="btn-ai tea-ai-btn" id="teaAiBtn">🤖 AI教我做</button>
+      </div>
+      <div id="teaAiResult"></div>
+    </div>
   </div>
 </div>
 

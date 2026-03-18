@@ -295,6 +295,105 @@ button:hover {
   background: #ddd;
 }
 
+/* ===== Tabs ===== */
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1.2rem;
+  border-bottom: 2px solid #eee;
+}
+
+.tab {
+  flex: 1;
+  background: none;
+  color: #999;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 10px 8px;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  border-radius: 0;
+}
+
+.tab:hover {
+  color: #666;
+  background: none;
+}
+
+.tab.active {
+  color: #e63946;
+  border-bottom-color: #e63946;
+  background: none;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* ===== Tea Tab ===== */
+.tea-btn {
+  width: 100%;
+  background: #e685b5;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-top: 10px;
+}
+
+.tea-btn:hover {
+  background: #d4609e;
+}
+
+.tea-item {
+  background: #fef0f5;
+  margin: 6px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border-left: 4px solid #e685b5;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.tea-person {
+  font-weight: bold;
+  color: #d4609e;
+  margin-right: 8px;
+}
+
+.tea-drink {
+  flex: 1;
+}
+
+.tea-time {
+  font-size: 0.75rem;
+  color: #999;
+  background: #fff0f5;
+  padding: 1px 6px;
+  border-radius: 10px;
+  white-space: nowrap;
+  margin-left: 6px;
+}
+
+.tea-ai-btn {
+  background: #d4609e;
+}
+
+.tea-ai-btn:hover {
+  background: #b84d85;
+}
+
 /* ===== Mobile Responsive (iPhone) ===== */
 @media screen and (max-width: 430px) {
   body {
