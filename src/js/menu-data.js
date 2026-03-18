@@ -311,6 +311,42 @@ const MENU_DB = {
       { name: "叻沙", time: 25 }, { name: "椰汁鸡汤", time: 25 },
       { name: "泰式酸辣虾汤", time: 20 }, { name: "南姜鸡汤", time: 25 }
     ]
+  },
+
+  "海鲜": {
+    hard: [
+      { name: "清蒸石斑鱼", time: 20 }, { name: "油焖大虾", time: 20 },
+      { name: "白灶虾", time: 10 }, { name: "葱姜炒蟹", time: 20 },
+      { name: "避风塘炒蟹", time: 25 }, { name: "新加坡辣椒蟹", time: 25 },
+      { name: "清蒸龙虾", time: 15 }, { name: "糥海参", time: 40 },
+      { name: "油浸笼基围", time: 35 }, { name: "红烧鲍鱼", time: 40 }
+    ],
+    fastMeat: [
+      { name: "蒜蓉粉丝蒸扇贝", time: 15 }, { name: "清蒸鲈鱼", time: 15 },
+      { name: "豆豉蒸鱼", time: 20 }, { name: "干烧带鱼", time: 20 },
+      { name: "香煎秋刀鱼", time: 15 }, { name: "椒盐皮皮虾", time: 12 },
+      { name: "椒盐鱿鱼", time: 12 }, { name: "辣炒蛤蜊", time: 10 },
+      { name: "爆炒鱿鱼须", time: 10 }, { name: "咸蛋黄焗虾", time: 15 },
+      { name: "白谝炒虾仁", time: 12 }, { name: "茉莉花蒸鱼", time: 15 },
+      { name: "红烧带鱼", time: 20 }, { name: "油爆大虾", time: 15 },
+      { name: "钟声虎皮虾", time: 15 }, { name: "炖大虾", time: 20 }
+    ],
+    veg: [
+      { name: "海苦笋汆豆腐", time: 15 }, { name: "海带结烧豆腐", time: 15 },
+      { name: "紫菜蛋花豆腐", time: 10 }, { name: "凉拌海带丝", time: 8 },
+      { name: "海菜拌豆腐丝", time: 8 }, { name: "海苦笋炒肌肉", time: 12 }
+    ],
+    cold: [
+      { name: "凉拌海蛰", time: 10 }, { name: "酱爆鱿鱼", time: 10 },
+      { name: "冷拌北极贝", time: 8 }, { name: "酶汁海螺", time: 15 },
+      { name: "芥末章鱼", time: 8 }, { name: "油泡小鱼干", time: 5 }
+    ],
+    soup: [
+      { name: "海鲜粲", time: 30 }, { name: "酸菜鱼汤", time: 25 },
+      { name: "鱼头豆腐汤", time: 25 }, { name: "蛤蜊豆腐汤", time: 15 },
+      { name: "海鲜馅餩子汤", time: 30 }, { name: "三鲜汤", time: 15 },
+      { name: "海带排骨汤", time: 50 }, { name: "冬瓜虾皮汤", time: 15 }
+    ]
   }
 };
 
