@@ -223,7 +223,7 @@ button:hover {
 .source-西餐  { background: #0d6efd; }
 .source-东南亚 { background: #20c997; }
 .source-海鲜 { background: #0dcaf0; }
-.source-我的拿手菜 { background: #fd7e14; }
+.source-奶茶甜品 { background: #e685b5; }
 
 /* ===== Source Multi-Select ===== */
 .source-group {
@@ -273,7 +273,7 @@ button:hover {
 .source-chip[data-source="西餐"].checked   { background: #0d6efd; border-color: #0d6efd; }
 .source-chip[data-source="东南亚"].checked  { background: #20c997; border-color: #20c997; }
 .source-chip[data-source="海鲜"].checked  { background: #0dcaf0; border-color: #0dcaf0; }
-.source-chip[data-source="我的拿手菜"].checked  { background: #fd7e14; border-color: #fd7e14; }
+.source-chip[data-source="奶茶甜品"].checked  { background: #e685b5; border-color: #e685b5; }
 
 .source-actions {
   display: flex;

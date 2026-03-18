@@ -82,7 +82,9 @@ const MENU_DB = {
       { name: "西芹炒肉", time: 10 }, { name: "尖椒炒肉丝", time: 10 },
       { name: "莴笋炒肉片", time: 10 }, { name: "豉汁蒸排骨", time: 25 },
       { name: "滑蛋虾仁", time: 10 }, { name: "香煎豆腐", time: 12 },
-      { name: "红烧鸡腿", time: 30 }, { name: "蒜苔炒肉", time: 10 }
+      { name: "红烧鸡腿", time: 30 }, { name: "蒜苔炒肉", time: 10 },
+      { name: "芹菜饺子", time: 40 }, { name: "韭菜饺子", time: 40 },
+      { name: "白菜饺子", time: 40 }
     ],
     veg: [
       { name: "酸辣土豆丝", time: 10 }, { name: "手撕包菜", time: 8 },
@@ -195,7 +197,8 @@ const MENU_DB = {
       { name: "日式炒乌冬", time: 12 }, { name: "亲子丼", time: 15 },
       { name: "牛丼", time: 15 }, { name: "章鱼小丸子", time: 20 },
       { name: "盐烤秋刀鱼", time: 15 }, { name: "日式厚蛋烧", time: 10 },
-      { name: "味噌猪排", time: 20 }, { name: "日式炸鸡(唐扬)", time: 20 }
+      { name: "味噎猪排", time: 20 }, { name: "日式炸鸡(唐扬)", time: 20 },
+      { name: "炙烤寿司", time: 25 }
     ],
     veg: [
       { name: "日式凉拌豆腐", time: 5 }, { name: "味噌茄子", time: 12 },
@@ -313,18 +316,6 @@ const MENU_DB = {
     ]
   },
 
-  "我的拿手菜": {
-    hard: [],
-    fastMeat: [
-      { name: "炙烤寿司", time: 25 }, { name: "寿喜锅", time: 30 },
-      { name: "芹菜饺子", time: 40 }, { name: "韭菜饺子", time: 40 },
-      { name: "白菜饺子", time: 40 }
-    ],
-    veg: [],
-    cold: [],
-    soup: []
-  },
-
   "海鲜": {
     hard: [
       { name: "清蒸石斑鱼", time: 20 }, { name: "油焖大虾", time: 20 },
@@ -359,6 +350,29 @@ const MENU_DB = {
       { name: "海鲜馅餩子汤", time: 30 }, { name: "三鲜汤", time: 15 },
       { name: "海带排骨汤", time: 50 }, { name: "冬瓜虾皮汤", time: 15 }
     ]
+  },
+
+  "奶茶甜品": {
+    hard: [],
+    fastMeat: [],
+    veg: [],
+    cold: [
+      { name: "芋圆奶茶(红茶底)", time: 25 }, { name: "芋圆奶茶(锡兰底)", time: 25 },
+      { name: "铁观音奶盖茶", time: 15 }, { name: "普洱奶盖茶", time: 15 },
+      { name: "茉莉花奶茶", time: 15 }, { name: "茉莉花奶盖茶", time: 15 },
+      { name: "红茶珍珠奶茶", time: 20 }, { name: "锡兰珍珠奶茶", time: 20 },
+      { name: "铁观音珍珠奶茶", time: 20 }, { name: "普洱珍珠奶茶", time: 20 },
+      { name: "红茶奶油顶", time: 15 }, { name: "锡兰奶油顶", time: 15 },
+      { name: "茉莉花奶油顶", time: 15 }, { name: "芋圆珍珠奶茶", time: 25 },
+      { name: "芒果冰沙", time: 10 }, { name: "草莓冰沙", time: 10 },
+      { name: "百香果茉莉茶", time: 10 }, { name: "柠檬红茶", time: 8 },
+      { name: "西瓜汁", time: 5 }, { name: "杨枝甘露", time: 20 },
+      { name: "芒果班戟", time: 25 }, { name: "草莓大福", time: 20 },
+      { name: "红豆芋圆汤", time: 25 }, { name: "双皮奶", time: 30 },
+      { name: "芒果西米露", time: 20 }, { name: "烧仙草奶茶", time: 15 },
+      { name: "黑糖珍珠鲜奶", time: 20 }, { name: "葡萄柚绿茶", time: 10 }
+    ],
+    soup: []
   }
 };
 
