@@ -157,6 +157,19 @@ button:hover {
   background: #1d3557;
 }
 
+.btn-notify {
+  background: #2a9d8f;
+}
+
+.btn-notify:hover {
+  background: #21867a;
+}
+
+.btn-notify.sent {
+  background: #aaa;
+  cursor: default;
+}
+
 .ai-section {
   margin-top: 15px;
   background: linear-gradient(135deg, #f1faee, #e8f4f8);

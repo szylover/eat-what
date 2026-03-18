@@ -82,6 +82,27 @@ ${dishes.join("、")}
 });
 
 const PORT = process.env.PORT || 3000;
+
+// Bark 推送通知
+app.post("/api/notify", async (req, res) => {
+  const { message } = req.body;
+  if (!message) return res.status(400).json({ error: "消息不能为空" });
+
+  const barkKey = process.env.BARK_KEY;
+  if (!barkKey) return res.status(500).json({ error: "Bark 未配置" });
+
+  const barkServer = process.env.BARK_SERVER || "https://api.day.app";
+
+  try {
+    const resp = await fetch(`${barkServer}/${barkKey}/今晚菜单已定/${encodeURIComponent(message)}?sound=minuet&group=eat-what&icon=https%3A%2F%2Fem-content.zobj.net%2Fsource%2Fapple%2F391%2Fcooking_1f373.png`);
+    if (!resp.ok) throw new Error(`Bark error: ${resp.status}`);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Bark error:", err.message);
+    res.status(500).json({ error: "Bark 推送失败" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🍳 吃什么服务已启动: http://localhost:${PORT}`);
 });

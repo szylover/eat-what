@@ -155,6 +155,11 @@ function renderResult() {
   $('result').style.display = 'block';
   $('aiResult').innerHTML = '';
   $('generateBtn').textContent = '🔄 不满意，换菜！';
+  // Reset notify button
+  const nb = $('notifyBtn');
+  nb.textContent = '📤 通知老公去买菜';
+  nb.disabled = false;
+  nb.classList.remove('sent');
 }
 
 // ===== Lock toggle =====
@@ -281,6 +286,31 @@ async function askTeaAI() {
   }
 }
 
+// ===== Notify =====
+async function notifyHusband() {
+  const btn = $('notifyBtn');
+  btn.textContent = '✉️ 发送中…';
+  btn.disabled = true;
+
+  const dishes = currentDishes.map(d => d.name).join('、');
+  const soups = currentSoups.map(d => d.name).join('、');
+  const msg = `🍳 菜：${dishes}${soups ? '\n🥣 汤：' + soups : ''}`;
+
+  try {
+    const resp = await fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg })
+    });
+    if (!resp.ok) throw new Error('Failed');
+    btn.textContent = '✅ 已通知！';
+    btn.classList.add('sent');
+  } catch (e) {
+    btn.textContent = '❌ 发送失败，点击重试';
+    btn.disabled = false;
+  }
+}
+
 // ===== Tab switching =====
 function switchTab(tabName) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
@@ -305,6 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   $('generateBtn').addEventListener('click', generateMenu);
   $('aiBtn').addEventListener('click', askAI);
+  $('notifyBtn').addEventListener('click', notifyHusband);
   $('teaBtn').addEventListener('click', generateTeaWithTracking);
   $('teaAiBtn').addEventListener('click', askTeaAI);
 
