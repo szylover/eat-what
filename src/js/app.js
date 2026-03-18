@@ -154,6 +154,7 @@ function renderResult() {
 
   $('result').style.display = 'block';
   $('aiResult').innerHTML = '';
+  $('generateBtn').textContent = '🔄 不满意，换菜！';
 }
 
 // ===== Lock toggle =====
@@ -173,6 +174,7 @@ function onSourceChange() {
   lockedDishes = {};
   lockedSoups = {};
   $('result').style.display = 'none';
+  $('generateBtn').textContent = '🎲 开抽！';
 }
 
 function updateChipStates() {
