@@ -313,6 +313,18 @@ const MENU_DB = {
     ]
   },
 
+  "我的拿手菜": {
+    hard: [],
+    fastMeat: [
+      { name: "炙烤寿司", time: 25 }, { name: "寿喜锅", time: 30 },
+      { name: "芹菜饺子", time: 40 }, { name: "韭菜饺子", time: 40 },
+      { name: "白菜饺子", time: 40 }
+    ],
+    veg: [],
+    cold: [],
+    soup: []
+  },
+
   "海鲜": {
     hard: [
       { name: "清蒸石斑鱼", time: 20 }, { name: "油焖大虾", time: 20 },
