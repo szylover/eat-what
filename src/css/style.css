@@ -1,0 +1,277 @@
+/* ===== Base ===== */
+body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background-color: #f4f4f9;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  margin: 0;
+}
+
+/* ===== Card ===== */
+.card {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 450px;
+}
+
+h1 {
+  color: #e63946;
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ===== Form Controls ===== */
+.input-group {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+input {
+  width: 60px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  text-align: center;
+}
+
+select {
+  padding: 5px 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 0.9rem;
+}
+
+button {
+  width: 100%;
+  background: #e63946;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-top: 10px;
+}
+
+button:hover {
+  background: #d62828;
+}
+
+/* ===== Result Area ===== */
+#result {
+  margin-top: 20px;
+  border-top: 2px dashed #eee;
+  padding-top: 15px;
+}
+
+.dish-item {
+  background: #fefae0;
+  margin: 5px 0;
+  padding: 8px 10px;
+  border-radius: 5px;
+  border-left: 4px solid #dda15e;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dish-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.dish-time {
+  font-size: 0.75rem;
+  color: #888;
+  font-weight: normal;
+  background: #fff3e0;
+  padding: 1px 6px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.total-time {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #e8f5e9;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  color: #2e7d32;
+  text-align: center;
+}
+
+/* ===== Lock Button ===== */
+.lock-btn {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  margin: 0;
+  width: auto;
+  color: #aaa;
+  transition: 0.2s;
+}
+
+.lock-btn.locked {
+  color: #e63946;
+}
+
+/* ===== AI Section ===== */
+.btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-ai {
+  background: #457b9d;
+}
+
+.btn-ai:hover {
+  background: #1d3557;
+}
+
+.ai-section {
+  margin-top: 15px;
+  background: linear-gradient(135deg, #f1faee, #e8f4f8);
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #457b9d;
+  line-height: 1.8;
+  font-size: 0.9rem;
+}
+
+.ai-section b {
+  color: #1d3557;
+}
+
+/* ===== Loading & Error ===== */
+.loading {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+}
+
+.loading::after {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e63946;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error {
+  color: #e63946;
+  background: #ffe5e5;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+
+/* ===== Source Tags ===== */
+.source-tag {
+  font-size: 0.7rem;
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 8px;
+  margin-left: 4px;
+  font-weight: normal;
+}
+
+.source-老饭骨 { background: #e63946; }
+.source-家常菜 { background: #2a9d8f; }
+.source-川湘菜 { background: #e76f51; }
+.source-粤菜  { background: #f4a261; }
+.source-日料  { background: #d63384; }
+.source-韩餐  { background: #6f42c1; }
+.source-西餐  { background: #0d6efd; }
+.source-东南亚 { background: #20c997; }
+
+/* ===== Source Multi-Select ===== */
+.source-group {
+  margin-bottom: 1rem;
+}
+
+.source-group > span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.source-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.source-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1.5px solid #ddd;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: 0.2s;
+  background: #f8f8f8;
+  user-select: none;
+}
+
+.source-chip input[type="checkbox"] {
+  display: none;
+}
+
+.source-chip.checked {
+  background: #e63946;
+  color: white;
+  border-color: #e63946;
+}
+
+.source-chip[data-source="家常菜"].checked { background: #2a9d8f; border-color: #2a9d8f; }
+.source-chip[data-source="川湘菜"].checked { background: #e76f51; border-color: #e76f51; }
+.source-chip[data-source="粤菜"].checked   { background: #f4a261; border-color: #f4a261; }
+.source-chip[data-source="日料"].checked   { background: #d63384; border-color: #d63384; }
+.source-chip[data-source="韩餐"].checked   { background: #6f42c1; border-color: #6f42c1; }
+.source-chip[data-source="西餐"].checked   { background: #0d6efd; border-color: #0d6efd; }
+.source-chip[data-source="东南亚"].checked  { background: #20c997; border-color: #20c997; }
+
+.source-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.chip-btn {
+  width: auto;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  background: #eee;
+  color: #555;
+  border-radius: 12px;
+  margin-top: 0;
+}
+
+.chip-btn:hover {
+  background: #ddd;
+}

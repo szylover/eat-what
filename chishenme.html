@@ -6,14 +6,20 @@
     <title>1小时快手菜单生成器</title>
     <style>
         body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
         h1 { color: #e63946; text-align: center; font-size: 1.5rem; margin-bottom: 1.5rem; }
         .input-group { margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; }
         input { width: 60px; padding: 5px; border: 1px solid #ddd; border-radius: 5px; text-align: center; }
+        select { padding: 5px 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 0.9rem; }
         button { width: 100%; background: #e63946; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         button:hover { background: #d62828; }
         #result { margin-top: 20px; border-top: 2px dashed #eee; padding-top: 15px; }
-        .dish-item { background: #fefae0; margin: 5px 0; padding: 8px; border-radius: 5px; border-left: 4px solid #dda15e; font-weight: bold; }
+        .dish-item { background: #fefae0; margin: 5px 0; padding: 8px 10px; border-radius: 5px; border-left: 4px solid #dda15e; font-weight: bold; display: flex; align-items: center; justify-content: space-between; }
+        .dish-info { display: flex; align-items: center; gap: 6px; flex: 1; }
+        .dish-time { font-size: 0.75rem; color: #888; font-weight: normal; background: #fff3e0; padding: 1px 6px; border-radius: 10px; white-space: nowrap; }
+        .total-time { margin-top: 10px; padding: 8px 12px; background: #e8f5e9; border-radius: 5px; font-size: 0.9rem; color: #2e7d32; text-align: center; }
+        .lock-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 2px 6px; margin: 0; width: auto; color: #aaa; transition: 0.2s; }
+        .lock-btn.locked { color: #e63946; }
         .timeline { font-size: 0.85rem; color: #666; background: #f1faee; padding: 10px; border-radius: 5px; margin-top: 15px; line-height: 1.6; }
         .timeline b { color: #1d3557; }
         .ai-section { margin-top: 15px; background: linear-gradient(135deg, #f1faee, #e8f4f8); padding: 15px; border-radius: 8px; border-left: 4px solid #457b9d; line-height: 1.8; font-size: 0.9rem; }
@@ -25,6 +31,11 @@
         .btn-group { display: flex; gap: 8px; }
         .btn-ai { background: #457b9d; }
         .btn-ai:hover { background: #1d3557; }
+        .source-tag { font-size: 0.7rem; color: #fff; padding: 1px 5px; border-radius: 8px; margin-left: 4px; font-weight: normal; }
+        .source-老饭骨 { background: #e63946; }
+        .source-家常菜 { background: #2a9d8f; }
+        .source-川湘菜 { background: #e76f51; }
+        .source-粤菜 { background: #f4a261; }
     </style>
 </head>
 <body>
@@ -32,6 +43,16 @@
 <div class="card">
     <h1>🍳 私人定制：今日抽签</h1>
     
+    <div class="input-group">
+        <span>菜单来源</span>
+        <select id="menuSource" onchange="onSourceChange()">
+            <option value="all">🌟 全部菜单</option>
+            <option value="老饭骨" selected>👨‍🍳 老饭骨</option>
+            <option value="家常菜">🏠 家常菜</option>
+            <option value="川湘菜">🌶️ 川湘菜</option>
+            <option value="粤菜">🥡 粤菜</option>
+        </select>
+    </div>
     <div class="input-group">
         <span>几道菜？(建议1-4)</span>
         <input type="number" id="dishCount" value="3" min="1" max="10">
@@ -49,7 +70,7 @@
 
     <div id="result" style="display:none;">
         <div id="dishList"></div>
-        <div class="timeline" id="timeLine"></div>
+        <div id="totalTime"></div>
         <div class="btn-group">
             <button class="btn-ai" onclick="askAI()">🤖 AI帮我规划出餐</button>
         </div>
@@ -58,75 +79,288 @@
 </div>
 
 <script>
-// 保存当前选中的菜和汤
-let currentDishes = [];
+let currentDishes = [];   // [{name, time, source}]
 let currentSoups = [];
+let lockedDishes = {};
+let lockedSoups = {};
 
-// 菜单数据库分类
-const MENU = {
-    hard: ["清炖狮子头","红烧狮子头","红烧肉","坛子肉","虎皮扣肉","东坡肉","梅菜扣肉","粉蒸肉","酱肘子","红烧蹄膀","扒肘子","红烧牛肉","大盘鸡","汽锅鸡","佛跳墙（大师版）","干烧大黄鱼","松鼠桂鱼","葱烧海参","扒原壳鲍鱼"],
-    fastMeat: ["酱爆鸡丁","宫保鸡丁","鱼香肉丝","京酱肉丝","蒜泥白肉","回锅肉","水煮肉片","锅包肉","糖醋里脊","干炸里脊","熘肝尖","葱爆羊肉","水煮牛肉","葱爆牛肉","辣子鸡","白斩鸡","糟溜鱼片","清蒸鱼","赛螃蟹","炸烹虾段","软炸虾仁","宫保虾球","油焖大虾","蒜蓉粉丝蒸扇贝"],
-    veg: ["麻婆豆腐","锅塌豆腐","家常豆腐","蟹黄豆腐","地三鲜","醋溜土豆丝","干煸豆角","蒜泥茄子","烧茄子","鱼香茄子","炒合菜","虎皮尖椒","上汤娃娃菜","冬笋炒肉"],
-    cold: ["老北京芥末墩","老虎菜","拌花菜","五香花生米","拍黄瓜","拌什锦"],
-    soup: ["乌鱼蛋汤","酸辣汤","冬瓜丸子汤","胡辣汤","腌笃鲜"]
+// ===== 多来源菜单数据库（每道菜带预估时间 min） =====
+const MENU_DB = {
+    "老饭骨": {
+        hard: [
+            {name:"清炖狮子头",time:60},{name:"红烧狮子头",time:50},{name:"红烧肉",time:50},
+            {name:"坛子肉",time:70},{name:"虎皮扣肉",time:60},{name:"东坡肉",time:80},
+            {name:"梅菜扣肉",time:60},{name:"粉蒸肉",time:50},{name:"酱肘子",time:90},
+            {name:"红烧蹄膀",time:80},{name:"扒肘子",time:70},{name:"红烧牛肉",time:60},
+            {name:"大盘鸡",time:45},{name:"汽锅鸡",time:60},{name:"佛跳墙",time:120},
+            {name:"干烧大黄鱼",time:40},{name:"松鼠桂鱼",time:45},{name:"葱烧海参",time:40},
+            {name:"扒原壳鲍鱼",time:50},{name:"九转大肠",time:60},{name:"四喜丸子",time:50},
+            {name:"南煎丸子",time:35},{name:"糖醋鲤鱼",time:35},{name:"带鱼段",time:30}
+        ],
+        fastMeat: [
+            {name:"酱爆鸡丁",time:15},{name:"宫保鸡丁",time:15},{name:"鱼香肉丝",time:15},
+            {name:"京酱肉丝",time:15},{name:"蒜泥白肉",time:20},{name:"回锅肉",time:15},
+            {name:"水煮肉片",time:20},{name:"锅包肉",time:20},{name:"糖醋里脊",time:20},
+            {name:"干炸里脊",time:15},{name:"熘肝尖",time:10},{name:"葱爆羊肉",time:10},
+            {name:"水煮牛肉",time:20},{name:"葱爆牛肉",time:10},{name:"辣子鸡",time:20},
+            {name:"白斩鸡",time:30},{name:"糟溜鱼片",time:15},{name:"清蒸鱼",time:20},
+            {name:"赛螃蟹",time:10},{name:"炸烹虾段",time:15},{name:"软炸虾仁",time:15},
+            {name:"宫保虾球",time:15},{name:"油焖大虾",time:20},{name:"蒜蓉粉丝蒸扇贝",time:15},
+            {name:"木须肉",time:15},{name:"滑炒里脊丝",time:12},{name:"焦熘肉段",time:15},
+            {name:"炒肝儿",time:20},{name:"爆三样",time:12},{name:"酱爆桃仁鸡丁",time:15}
+        ],
+        veg: [
+            {name:"麻婆豆腐",time:15},{name:"锅塌豆腐",time:20},{name:"家常豆腐",time:15},
+            {name:"蟹黄豆腐",time:20},{name:"地三鲜",time:15},{name:"醋溜土豆丝",time:10},
+            {name:"干煸豆角",time:15},{name:"蒜泥茄子",time:15},{name:"烧茄子",time:20},
+            {name:"鱼香茄子",time:15},{name:"炒合菜",time:10},{name:"虎皮尖椒",time:10},
+            {name:"上汤娃娃菜",time:10},{name:"冬笋炒肉",time:12},{name:"醋溜白菜",time:8},
+            {name:"焦溜豆腐",time:15},{name:"炒豆芽",time:8},{name:"素炒三丝",time:10},
+            {name:"香菇油菜",time:8},{name:"蚝油生菜",time:8}
+        ],
+        cold: [
+            {name:"老北京芥末墩",time:15},{name:"老虎菜",time:5},{name:"拌花菜",time:10},
+            {name:"五香花生米",time:15},{name:"拍黄瓜",time:5},{name:"拌什锦",time:10},
+            {name:"皮蛋豆腐",time:5},{name:"炝拌土豆丝",time:10},{name:"蒜泥黄瓜",time:5},
+            {name:"凉拌木耳",time:10},{name:"姜汁皮蛋",time:5},{name:"糖拌西红柿",time:3}
+        ],
+        soup: [
+            {name:"乌鱼蛋汤",time:15},{name:"酸辣汤",time:15},{name:"冬瓜丸子汤",time:25},
+            {name:"胡辣汤",time:20},{name:"腌笃鲜",time:60},{name:"西红柿鸡蛋汤",time:10},
+            {name:"紫菜蛋花汤",time:8},{name:"酸菜白肉汤",time:30},{name:"三鲜汤",time:15}
+        ]
+    },
+    "家常菜": {
+        hard: [
+            {name:"红烧排骨",time:45},{name:"糖醋排骨",time:40},{name:"可乐鸡翅",time:30},
+            {name:"啤酒鸭",time:50},{name:"黄焖鸡",time:35},{name:"板栗烧鸡",time:40},
+            {name:"土豆炖牛腩",time:60},{name:"萝卜炖羊肉",time:70},{name:"猪蹄炖黄豆",time:80}
+        ],
+        fastMeat: [
+            {name:"番茄炒蛋",time:8},{name:"青椒肉丝",time:12},{name:"洋葱炒蛋",time:8},
+            {name:"肉末蒸蛋",time:15},{name:"蒜苗回锅肉",time:15},{name:"黄瓜炒鸡蛋",time:8},
+            {name:"土豆烧肉",time:30},{name:"蚂蚁上树",time:15},{name:"肉末豆腐",time:12},
+            {name:"韭菜炒蛋",time:8},{name:"西芹炒肉",time:10},{name:"尖椒炒肉丝",time:10},
+            {name:"莴笋炒肉片",time:10},{name:"豉汁蒸排骨",time:25},{name:"滑蛋虾仁",time:10},
+            {name:"香煎豆腐",time:12},{name:"红烧鸡腿",time:30},{name:"蒜苔炒肉",time:10}
+        ],
+        veg: [
+            {name:"酸辣土豆丝",time:10},{name:"手撕包菜",time:8},{name:"清炒空心菜",time:5},
+            {name:"蒜炒小白菜",time:5},{name:"西蓝花炒虾仁",time:12},{name:"白灼秋葵",time:8},
+            {name:"凉拌腐竹",time:10},{name:"素炒豆干",time:10},{name:"炒藕片",time:8},
+            {name:"椒盐玉米",time:15},{name:"拔丝地瓜",time:15},{name:"清炒山药",time:8},
+            {name:"蒜蓉西蓝花",time:8},{name:"荷塘小炒",time:10}
+        ],
+        cold: [
+            {name:"凉拌黄瓜",time:5},{name:"凉拌海带丝",time:8},{name:"凉拌粉丝",time:10},
+            {name:"凉拌鸡丝",time:15},{name:"蒜泥茄子",time:15},{name:"白切鸡",time:30},
+            {name:"口水鸡",time:25},{name:"红油耳丝",time:15}
+        ],
+        soup: [
+            {name:"西红柿鸡蛋汤",time:10},{name:"紫菜蛋花汤",time:8},{name:"玉米排骨汤",time:50},
+            {name:"冬瓜排骨汤",time:45},{name:"山药排骨汤",time:50},{name:"银耳莲子汤",time:40},
+            {name:"南瓜粥",time:30},{name:"皮蛋瘦肉粥",time:40}
+        ]
+    },
+    "川湘菜": {
+        hard: [
+            {name:"水煮鱼",time:30},{name:"毛血旺",time:35},{name:"干锅牛蛙",time:25},
+            {name:"剁椒鱼头",time:25},{name:"干锅排骨",time:35},{name:"粉蒸排骨",time:45},
+            {name:"小炒黄牛肉",time:20},{name:"干锅花菜",time:20},{name:"干锅鸡",time:30}
+        ],
+        fastMeat: [
+            {name:"麻辣香锅",time:20},{name:"辣椒炒肉",time:12},{name:"小炒肉",time:10},
+            {name:"泡椒凤爪",time:30},{name:"歌乐山辣子鸡",time:20},{name:"尖椒兔",time:20},
+            {name:"盐煎肉",time:12},{name:"农家小炒肉",time:12},{name:"毛氏红烧肉",time:50},
+            {name:"夫妻肺片",time:25},{name:"泡椒牛肉",time:15},{name:"香辣虾",time:20},
+            {name:"口味虾",time:25},{name:"豆豉蒸排骨",time:25},{name:"水煮牛蛙",time:20}
+        ],
+        veg: [
+            {name:"虎皮青椒",time:8},{name:"干煸四季豆",time:12},{name:"酸辣土豆丝",time:10},
+            {name:"麻辣豆腐",time:12},{name:"火爆腰花",time:10},{name:"擂辣椒皮蛋",time:8},
+            {name:"农家小豆腐",time:15},{name:"干锅有机花菜",time:15},{name:"酸豆角炒肉末",time:10},
+            {name:"外婆菜",time:10}
+        ],
+        cold: [
+            {name:"川北凉粉",time:10},{name:"红油抄手",time:15},{name:"棒棒鸡",time:20},
+            {name:"蒜泥白肉",time:20},{name:"口水鸡",time:25},{name:"凉拌毛肚",time:15}
+        ],
+        soup: [
+            {name:"酸萝卜老鸭汤",time:60},{name:"番茄牛腩汤",time:50},{name:"酸辣汤",time:15},
+            {name:"酸菜鱼汤",time:25},{name:"豆花鱼汤",time:20}
+        ]
+    },
+    "粤菜": {
+        hard: [
+            {name:"白切鸡",time:35},{name:"烧鹅",time:90},{name:"脆皮烧肉",time:80},
+            {name:"豉汁蒸排骨",time:25},{name:"清蒸石斑鱼",time:20},{name:"蜜汁叉烧",time:50},
+            {name:"盐焗鸡",time:60},{name:"菠萝咕噜肉",time:20},{name:"白灼虾",time:10}
+        ],
+        fastMeat: [
+            {name:"滑蛋牛肉",time:10},{name:"姜葱炒蟹",time:20},{name:"豉椒炒蛤蜊",time:10},
+            {name:"蚝油牛肉",time:12},{name:"XO酱炒带子",time:10},{name:"干炒牛河",time:10},
+            {name:"清蒸鲈鱼",time:15},{name:"椒盐九肚鱼",time:15},{name:"豉汁凤爪",time:30},
+            {name:"咸蛋黄焗虾",time:15},{name:"避风塘炒蟹",time:20},{name:"梅菜蒸肉饼",time:20},
+            {name:"煎酿三宝",time:25},{name:"椒盐虾",time:15},{name:"蒸水蛋",time:10}
+        ],
+        veg: [
+            {name:"蚝油生菜",time:5},{name:"白灼菜心",time:5},{name:"蒜蓉炒通菜",time:5},
+            {name:"鲍汁扣西蓝花",time:10},{name:"上汤浸时蔬",time:8},{name:"干炒牛河(素)",time:10},
+            {name:"蒸酿豆腐",time:20},{name:"XO酱炒芥蓝",time:8},{name:"腐乳通菜",time:5}
+        ],
+        cold: [
+            {name:"白云凤爪",time:30},{name:"蜜汁烧味拼盘",time:20},{name:"凉拌海蜇",time:10},
+            {name:"盐水毛豆",time:15},{name:"话梅花生",time:15}
+        ],
+        soup: [
+            {name:"老火靓汤",time:90},{name:"花生猪脚汤",time:70},{name:"虫草花鸡汤",time:60},
+            {name:"冬瓜薏米汤",time:50},{name:"西洋菜猪骨汤",time:60},{name:"胡椒猪肚鸡",time:70},
+            {name:"莲藕排骨汤",time:60}
+        ]
+    }
 };
+
+// 获取当前选中来源的合并菜单
+function getActiveMenu() {
+    const source = document.getElementById('menuSource').value;
+    if (source === 'all') {
+        // 合并所有来源，给每道菜打上来源标记
+        const merged = { hard:[], fastMeat:[], veg:[], cold:[], soup:[] };
+        for (const [src, menu] of Object.entries(MENU_DB)) {
+            for (const cat of Object.keys(merged)) {
+                merged[cat].push(...menu[cat].map(d => ({...d, source: src})));
+            }
+        }
+        return merged;
+    }
+    const menu = MENU_DB[source];
+    return {
+        hard: menu.hard.map(d => ({...d, source})),
+        fastMeat: menu.fastMeat.map(d => ({...d, source})),
+        veg: menu.veg.map(d => ({...d, source})),
+        cold: menu.cold.map(d => ({...d, source})),
+        soup: menu.soup.map(d => ({...d, source}))
+    };
+}
+
+function onSourceChange() {
+    // 切换来源时清除锁定
+    lockedDishes = {};
+    lockedSoups = {};
+    document.getElementById('result').style.display = 'none';
+}
+
+function pickRandom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
 
 function generateMenu() {
     const dCount = parseInt(document.getElementById('dishCount').value);
     const sCount = parseInt(document.getElementById('soupCount').value);
-    
+    const MENU = getActiveMenu();
+
     let selectedDishes = [];
-    
-    // 逻辑：如果选多道菜，第1道优先选“大菜/硬菜”或“硬肉菜”
+    let usedNames = new Set();
+
+    // 第1道优先选硬菜
     if (dCount >= 1) {
-        let pool = MENU.hard.concat(MENU.fastMeat);
-        selectedDishes.push(pool[Math.floor(Math.random() * pool.length)]);
+        if (lockedDishes[0]) {
+            selectedDishes.push(lockedDishes[0]);
+            usedNames.add(lockedDishes[0].name);
+        } else {
+            let pool = MENU.hard.concat(MENU.fastMeat);
+            let pick = pickRandom(pool);
+            selectedDishes.push(pick);
+            usedNames.add(pick.name);
+        }
     }
-    
+
     // 剩下的菜从快手肉、素菜、凉菜里随机
     if (dCount > 1) {
         let pool = MENU.fastMeat.concat(MENU.veg).concat(MENU.cold);
-        for(let i=0; i < dCount-1; i++) {
-            let pick = pool[Math.floor(Math.random() * pool.length)];
-            if(!selectedDishes.includes(pick)) {
-                selectedDishes.push(pick);
-            } else { i--; } // 避免重复
+        let attempts = 0;
+        for (let i = 0; i < dCount - 1; i++) {
+            const idx = i + 1;
+            if (lockedDishes[idx]) {
+                selectedDishes.push(lockedDishes[idx]);
+                usedNames.add(lockedDishes[idx].name);
+            } else {
+                let pick = pickRandom(pool);
+                if (!usedNames.has(pick.name)) {
+                    selectedDishes.push(pick);
+                    usedNames.add(pick.name);
+                    attempts = 0;
+                } else {
+                    attempts++;
+                    if (attempts > 50) { selectedDishes.push(pick); usedNames.add(pick.name); attempts = 0; }
+                    else { i--; }
+                }
+            }
         }
     }
 
     // 选汤
     let selectedSoups = [];
-    for(let i=0; i < sCount; i++) {
-        let pick = MENU.soup[Math.floor(Math.random() * MENU.soup.length)];
-        selectedSoups.push(pick);
+    for (let i = 0; i < sCount; i++) {
+        if (lockedSoups[i]) {
+            selectedSoups.push(lockedSoups[i]);
+        } else {
+            selectedSoups.push(pickRandom(MENU.soup));
+        }
     }
 
-    // 保存到全局变量供AI使用
+    // 清理超出范围的锁定
+    for (let k in lockedDishes) { if (k >= dCount) delete lockedDishes[k]; }
+    for (let k in lockedSoups) { if (k >= sCount) delete lockedSoups[k]; }
+
     currentDishes = selectedDishes;
     currentSoups = selectedSoups;
+    renderResult();
+}
 
-    // 渲染结果
+function renderResult() {
     const dishListDiv = document.getElementById('dishList');
+    const showSource = document.getElementById('menuSource').value === 'all';
     dishListDiv.innerHTML = "<strong>今日菜单：</strong>";
-    selectedDishes.forEach(d => {
-        dishListDiv.innerHTML += `<div class="dish-item">🍛 ${d}</div>`;
-    });
-    selectedSoups.forEach(s => {
-        dishListDiv.innerHTML += `<div class="dish-item" style="border-left-color:#457b9d">🥣 ${s}</div>`;
+
+    currentDishes.forEach((d, i) => {
+        const isLocked = !!lockedDishes[i];
+        const sourceTag = showSource ? `<span class="source-tag source-${d.source}">${d.source}</span>` : '';
+        dishListDiv.innerHTML += `<div class="dish-item">
+            <div class="dish-info">🍛 ${d.name}${sourceTag}<span class="dish-time">⏱${d.time}min</span></div>
+            <button class="lock-btn ${isLocked ? 'locked' : ''}" onclick="toggleLock('dish',${i})">${isLocked ? '🔒' : '🔓'}</button>
+        </div>`;
     });
 
-    // 生成1小时逻辑
-    const timeLineDiv = document.getElementById('timeLine');
-    timeLineDiv.innerHTML = `
-        <b>⏳ 1小时出餐策略：</b><br>
-        1. <b>[0-15min]</b> 集中处理：一次性把${selectedDishes.length}菜${sCount}汤的葱姜蒜切好，肉和菜分类备齐。<br>
-        2. <b>[15min]</b> 启动：如果是炖/蒸菜，立刻上火；如果是炒菜，先腌制肉类。<br>
-        3. <b>[35-55min]</b> 连炒：先炒素菜再炒肉，最后做${selectedSoups[0] || '热菜'}。<br>
-        4. <b>[60min]</b> 准时开饭！
-    `;
-    
+    currentSoups.forEach((s, i) => {
+        const isLocked = !!lockedSoups[i];
+        const sourceTag = showSource ? `<span class="source-tag source-${s.source}">${s.source}</span>` : '';
+        dishListDiv.innerHTML += `<div class="dish-item" style="border-left-color:#457b9d">
+            <div class="dish-info">🥣 ${s.name}${sourceTag}<span class="dish-time">⏱${s.time}min</span></div>
+            <button class="lock-btn ${isLocked ? 'locked' : ''}" onclick="toggleLock('soup',${i})">${isLocked ? '🔒' : '🔓'}</button>
+        </div>`;
+    });
+
+    // 显示总时间估算
+    const allItems = [...currentDishes, ...currentSoups];
+    const maxTime = Math.max(...allItems.map(d => d.time));
+    const sumTime = allItems.reduce((s, d) => s + d.time, 0);
+    document.getElementById('totalTime').innerHTML =
+        `<div class="total-time">⏱ 串行总时间 ~${sumTime}min / 并行最快 ~${maxTime}min</div>`;
+
     document.getElementById('result').style.display = 'block';
     document.getElementById('aiResult').innerHTML = '';
+}
+
+function toggleLock(type, index) {
+    if (type === 'dish') {
+        if (lockedDishes[index]) { delete lockedDishes[index]; }
+        else { lockedDishes[index] = currentDishes[index]; }
+    } else {
+        if (lockedSoups[index]) { delete lockedSoups[index]; }
+        else { lockedSoups[index] = currentSoups[index]; }
+    }
+    renderResult();
 }
 
 async function askAI() {
@@ -137,7 +371,11 @@ async function askAI() {
         const resp = await fetch('/api/cooking-plan', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ dishes: currentDishes, soups: currentSoups, people: parseInt(document.getElementById('peopleCount').value) })
+            body: JSON.stringify({
+                dishes: currentDishes.map(d => d.name),
+                soups: currentSoups.map(d => d.name),
+                people: parseInt(document.getElementById('peopleCount').value)
+            })
         });
 
         if (!resp.ok) {

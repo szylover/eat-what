@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>今天吃什么 - AI菜单生成器</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="card">
+  <h1>🍳 私人定制：今日抽签</h1>
+
+  <div class="source-group">
+    <span>菜单来源（可多选）</span>
+    <div class="source-checks" id="menuSources">
+      <label class="source-chip checked" data-source="老饭骨"><input type="checkbox" value="老饭骨" checked>👨‍🍳 老饭骨</label>
+      <label class="source-chip" data-source="家常菜"><input type="checkbox" value="家常菜">🏠 家常菜</label>
+      <label class="source-chip" data-source="川湘菜"><input type="checkbox" value="川湘菜">🌶️ 川湘菜</label>
+      <label class="source-chip" data-source="粤菜"><input type="checkbox" value="粤菜">🥡 粤菜</label>
+      <label class="source-chip" data-source="日料"><input type="checkbox" value="日料">🍣 日料</label>
+      <label class="source-chip" data-source="韩餐"><input type="checkbox" value="韩餐">🥘 韩餐</label>
+      <label class="source-chip" data-source="西餐"><input type="checkbox" value="西餐">🥩 西餐</label>
+      <label class="source-chip" data-source="东南亚"><input type="checkbox" value="东南亚">🌴 东南亚</label>
+    </div>
+    <div class="source-actions">
+      <button class="chip-btn" id="selectAllBtn">全选</button>
+      <button class="chip-btn" id="clearAllBtn">清空</button>
+    </div>
+  </div>
+  <div class="input-group">
+    <span>几道菜？(建议1-4)</span>
+    <input type="number" id="dishCount" value="3" min="1" max="10">
+  </div>
+  <div class="input-group">
+    <span>几道汤？</span>
+    <input type="number" id="soupCount" value="1" min="0" max="5">
+  </div>
+  <div class="input-group">
+    <span>几个人吃？</span>
+    <input type="number" id="peopleCount" value="2" min="1" max="20">
+  </div>
+
+  <button id="generateBtn">帮我做决定！</button>
+
+  <div id="result" style="display:none;">
+    <div id="dishList"></div>
+    <div id="totalTime"></div>
+    <div class="btn-group">
+      <button class="btn-ai" id="aiBtn">🤖 AI帮我规划出餐</button>
+    </div>
+    <div id="aiResult"></div>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
