@@ -1,17 +1,24 @@
 /* ===== Base ===== */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
-  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
   background-color: #f4f4f9;
   display: flex;
   justify-content: center;
-  padding: 20px;
+  padding: 12px;
   margin: 0;
+  min-height: 100vh;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* ===== Card ===== */
 .card {
   background: white;
-  padding: 2rem;
+  padding: 1.2rem;
   border-radius: 15px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   width: 100%;
@@ -35,17 +42,22 @@ h1 {
 
 input {
   width: 60px;
-  padding: 5px;
+  padding: 8px 5px;
   border: 1px solid #ddd;
   border-radius: 5px;
   text-align: center;
+  font-size: 16px; /* prevents iOS zoom on focus */
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 select {
-  padding: 5px 8px;
+  padding: 8px;
   border: 1px solid #ddd;
   border-radius: 5px;
-  font-size: 0.9rem;
+  font-size: 16px; /* prevents iOS zoom */
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 button {
@@ -87,8 +99,11 @@ button:hover {
 .dish-info {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
 }
 
 .dish-time {
@@ -274,4 +289,118 @@ button:hover {
 
 .chip-btn:hover {
   background: #ddd;
+}
+
+/* ===== Mobile Responsive (iPhone) ===== */
+@media screen and (max-width: 430px) {
+  body {
+    padding: 8px;
+  }
+
+  .card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  h1 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .input-group {
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .input-group span {
+    flex: 1;
+  }
+
+  input {
+    width: 55px;
+    flex-shrink: 0;
+  }
+
+  button {
+    padding: 14px;
+    font-size: 1rem;
+    border-radius: 10px;
+  }
+
+  /* Source chips: smaller on narrow screens */
+  .source-chip {
+    padding: 5px 8px;
+    font-size: 0.75rem;
+  }
+
+  .source-checks {
+    gap: 5px;
+  }
+
+  /* Dish items */
+  .dish-item {
+    padding: 8px;
+    font-size: 0.85rem;
+  }
+
+  .dish-info {
+    gap: 3px;
+    font-size: 0.85rem;
+  }
+
+  .dish-time {
+    font-size: 0.7rem;
+    padding: 1px 5px;
+  }
+
+  .source-tag {
+    font-size: 0.6rem;
+    padding: 1px 4px;
+  }
+
+  .total-time {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+
+  /* AI section */
+  .ai-section {
+    padding: 12px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .error {
+    font-size: 0.8rem;
+  }
+}
+
+/* iPhone SE / small screens */
+@media screen and (max-width: 375px) {
+  .card {
+    padding: 0.8rem;
+  }
+
+  h1 {
+    font-size: 1.1rem;
+  }
+
+  .source-chip {
+    padding: 4px 6px;
+    font-size: 0.7rem;
+  }
+
+  .dish-info {
+    font-size: 0.8rem;
+  }
+}
+
+/* Safe area for iPhone with notch */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    padding-top: calc(12px + env(safe-area-inset-top));
+  }
 }
