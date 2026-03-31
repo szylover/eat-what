@@ -60,7 +60,7 @@ ${dishes.join("、")}
           { role: "system", content: "你是一个热情的中餐烹饪助手，擅长快速出餐策略。回答简洁实用。" },
           { role: "user", content: prompt },
         ],
-        max_tokens: 1000,
+        max_tokens: 2000,
         temperature: 0.8,
       }),
     });
