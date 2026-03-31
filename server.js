@@ -55,14 +55,15 @@ ${dishes.join("、")}
         "Content-Type": "application/json",
         "api-key": apiKey,
       },
-      body: JSON.stringify({
+      body: JSON.stringify(Object.assign({
         messages: [
           { role: "system", content: "你是一个热情的中餐烹饪助手，擅长快速出餐策略。回答简洁实用。" },
           { role: "user", content: prompt },
         ],
-        max_tokens: 2000,
-        temperature: 0.8,
-      }),
+      }, /gpt-3|gpt-35/.test(apiUrl)
+        ? { max_tokens: 2000, temperature: 0.8 }
+        : { max_completion_tokens: 16000 }
+      )),
     });
 
     if (!response.ok) {
