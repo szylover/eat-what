@@ -56,8 +56,7 @@ ${dishes.join("、")}
           { role: "system", content: "你是一个热情的中餐烹饪助手，擅长快速出餐策略。回答简洁实用。" },
           { role: "user", content: prompt },
         ],
-        max_completion_tokens: 1000,
-        temperature: 0.8,
+        max_completion_tokens: 16000,
       }),
     });
 
@@ -69,12 +68,7 @@ ${dishes.join("、")}
     }
 
     const data = await response.json();
-    context.log("Azure OpenAI response:", JSON.stringify(data));
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) {
-      context.res = { status: 200, body: { plan: "AI 暂时无法生成建议", debug: data } };
-      return;
-    }
+    const content = data.choices?.[0]?.message?.content || "AI 暂时无法生成建议，请稍后再试。";
     context.res = { status: 200, body: { plan: content } };
   } catch (err) {
     context.log.error("Azure OpenAI error:", err.message);
