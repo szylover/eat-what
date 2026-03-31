@@ -191,6 +191,34 @@ function updateChipStates() {
 }
 
 // ===== AI =====
+async function readSSE(resp, targetDiv) {
+  targetDiv.innerHTML = '<div class="ai-section"></div>';
+  const section = targetDiv.querySelector('.ai-section');
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let fullContent = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop();
+    for (const line of lines) {
+      if (line.startsWith('data: ') && line.trim() !== 'data: [DONE]') {
+        try {
+          const data = JSON.parse(line.slice(6));
+          if (data.content) {
+            fullContent += data.content;
+            section.innerHTML = fullContent;
+          }
+        } catch {}
+      }
+    }
+  }
+}
+
 async function askAI() {
   const aiDiv = $('aiResult');
   aiDiv.innerHTML = '<div class="loading">AI 正在规划出餐方案…</div>';
@@ -211,8 +239,13 @@ async function askAI() {
       throw new Error(err.error || `请求失败 (${resp.status})`);
     }
 
-    const data = await resp.json();
-    aiDiv.innerHTML = `<div class="ai-section">${data.plan}</div>`;
+    const ct = resp.headers.get('content-type') || '';
+    if (ct.includes('text/event-stream')) {
+      await readSSE(resp, aiDiv);
+    } else {
+      const data = await resp.json();
+      aiDiv.innerHTML = `<div class="ai-section">${data.plan}</div>`;
+    }
   } catch (e) {
     aiDiv.innerHTML = `<div class="error">⚠️ ${e.message}</div>`;
   }
@@ -279,8 +312,13 @@ async function askTeaAI() {
       throw new Error(err.error || `请求失败 (${resp.status})`);
     }
 
-    const data = await resp.json();
-    aiDiv.innerHTML = `<div class="ai-section">${data.plan}</div>`;
+    const ct = resp.headers.get('content-type') || '';
+    if (ct.includes('text/event-stream')) {
+      await readSSE(resp, aiDiv);
+    } else {
+      const data = await resp.json();
+      aiDiv.innerHTML = `<div class="ai-section">${data.plan}</div>`;
+    }
   } catch (e) {
     aiDiv.innerHTML = `<div class="error">⚠️ ${e.message}</div>`;
   }

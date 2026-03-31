@@ -48,6 +48,8 @@ ${dishes.join("、")}
   const apiUrl = process.env.AZURE_OPENAI_ENDPOINT;
   const apiKey = process.env.AZURE_OPENAI_API_KEY;
 
+  const isLegacyModel = /gpt-3|gpt-35/.test(apiUrl);
+
   try {
     const response = await fetch(apiUrl, {
       method: "POST",
@@ -60,7 +62,8 @@ ${dishes.join("、")}
           { role: "system", content: "你是一个热情的中餐烹饪助手，擅长快速出餐策略。回答简洁实用。" },
           { role: "user", content: prompt },
         ],
-      }, /gpt-3|gpt-35/.test(apiUrl)
+        stream: true,
+      }, isLegacyModel
         ? { max_tokens: 2000, temperature: 0.8 }
         : { max_completion_tokens: 16000 }
       )),
@@ -72,10 +75,38 @@ ${dishes.join("、")}
       return res.status(500).json({ error: "AI 服务调用失败: " + response.status });
     }
 
-    const data = await response.json();
-    console.log("Azure response:", JSON.stringify(data, null, 2));
-    const content = data.choices?.[0]?.message?.content || "AI 暂时无法生成建议，请稍后再试。";
-    res.json({ plan: content });
+    // Stream SSE to client
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const lines = buffer.split("\n");
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (line.startsWith("data: ") && line.trim() !== "data: [DONE]") {
+          try {
+            const json = JSON.parse(line.slice(6));
+            const content = json.choices?.[0]?.delta?.content;
+            if (content) {
+              res.write(`data: ${JSON.stringify({ content })}\n\n`);
+            }
+          } catch {}
+        }
+      }
+    }
+
+    res.write("data: [DONE]\n\n");
+    res.end();
   } catch (err) {
     console.error("Azure OpenAI error:", err.message);
     res.status(500).json({ error: "AI 服务调用失败，请检查配置" });
