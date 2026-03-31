@@ -56,7 +56,7 @@ ${dishes.join("、")}
           { role: "system", content: "你是一个热情的中餐烹饪助手，擅长快速出餐策略。回答简洁实用。" },
           { role: "user", content: prompt },
         ],
-        max_tokens: 1000,
+        max_completion_tokens: 1000,
         temperature: 0.8,
       }),
     });
@@ -64,7 +64,7 @@ ${dishes.join("、")}
     if (!response.ok) {
       const errBody = await response.text();
       context.log.error("Azure OpenAI error:", response.status, errBody);
-      context.res = { status: 500, body: { error: "AI 服务调用失败: " + response.status } };
+      context.res = { status: 500, body: { error: "AI 服务调用失败: " + response.status, detail: errBody } };
       return;
     }
 
