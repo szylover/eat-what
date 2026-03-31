@@ -69,7 +69,12 @@ ${dishes.join("、")}
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "AI 暂时无法生成建议，请稍后再试。";
+    context.log("Azure OpenAI response:", JSON.stringify(data));
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) {
+      context.res = { status: 200, body: { plan: "AI 暂时无法生成建议", debug: data } };
+      return;
+    }
     context.res = { status: 200, body: { plan: content } };
   } catch (err) {
     context.log.error("Azure OpenAI error:", err.message);
