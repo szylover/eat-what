@@ -57,8 +57,8 @@ ${dishes.join("、")}
           { role: "user", content: prompt },
         ],
       }, /gpt-3|gpt-35/.test(apiUrl)
-        ? { max_tokens: 2000, temperature: 0.8 }
-        : { max_completion_tokens: 16000 }
+        ? { max_tokens: 1500, temperature: 0.8 }
+        : { max_completion_tokens: 1500, temperature: 0.8 }
       )),
     });
 
