@@ -8,21 +8,46 @@ app.use(express.json());
 // 提供 src/ 下的静态文件
 app.use(express.static(path.join(__dirname, "src")));
 
-// AI 生成烹饪策略
-app.post("/api/cooking-plan", async (req, res) => {
-  const { dishes, soups, people } = req.body;
-  const peopleCount = parseInt(people) || 2;
-
-  if (!Array.isArray(dishes) || !Array.isArray(soups)) {
-    return res.status(400).json({ error: "请提供 dishes 和 soups 数组" });
+function normalizeMenuItems(items, label) {
+  if (!Array.isArray(items) || items.length > 12) {
+    throw new Error(`${label} 必须是最多 12 项的数组`);
   }
 
+  return items.map((item) => {
+    if (typeof item !== "string") {
+      throw new Error(`${label} 中的每项必须是文本`);
+    }
+
+    const normalized = item.trim();
+    if (!normalized || normalized.length > 100) {
+      throw new Error(`${label} 中的每项必须是 1-100 个字符`);
+    }
+    return normalized;
+  });
+}
+
+// AI 生成烹饪策略
+app.post("/api/cooking-plan", async (req, res) => {
+  const body = req.body ?? {};
+  let dishes;
+  let soups;
+  try {
+    dishes = normalizeMenuItems(body.dishes, "dishes");
+    soups = normalizeMenuItems(body.soups, "soups");
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  const parsedPeople = Number.parseInt(body.people, 10);
+  const peopleCount = Number.isInteger(parsedPeople) && parsedPeople >= 1 && parsedPeople <= 20
+    ? parsedPeople
+    : 2;
   const allItems = [...dishes, ...soups];
   if (allItems.length === 0) {
     return res.status(400).json({ error: "至少选择一道菜或一道汤" });
   }
 
-  const prompt = req.body.mode === 'tea'
+  const prompt = body.mode === 'tea'
     ? `你是一位专业奶茶店调饮师。
 用户今天要做以下饮品（${peopleCount}人份）：
 ${dishes.join("、")}
@@ -47,8 +72,13 @@ ${dishes.join("、")}
 
   const apiUrl = process.env.AZURE_OPENAI_ENDPOINT;
   const apiKey = process.env.AZURE_OPENAI_API_KEY;
+  if (!apiUrl || !apiKey) {
+    return res.status(500).json({ error: "AI 服务未配置" });
+  }
 
   const isLegacyModel = /gpt-3|gpt-35/.test(apiUrl);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60_000);
 
   try {
     const response = await fetch(apiUrl, {
@@ -65,8 +95,9 @@ ${dishes.join("、")}
         stream: true,
       }, isLegacyModel
         ? { max_tokens: 2000, temperature: 0.8 }
-        : { max_completion_tokens: 16000 }
+        : { max_completion_tokens: 1500 }
       )),
+      signal: controller.signal,
     });
 
     if (!response.ok) {
@@ -100,8 +131,23 @@ ${dishes.join("、")}
             if (content) {
               res.write(`data: ${JSON.stringify({ content })}\n\n`);
             }
-          } catch {}
+          } catch (error) {
+            console.warn("Unable to parse Azure OpenAI stream event:", error.message);
+          }
         }
+      }
+    }
+
+    buffer += decoder.decode();
+    if (buffer.startsWith("data: ") && buffer.trim() !== "data: [DONE]") {
+      try {
+        const json = JSON.parse(buffer.slice(6));
+        const content = json.choices?.[0]?.delta?.content;
+        if (content) {
+          res.write(`data: ${JSON.stringify({ content })}\n\n`);
+        }
+      } catch (error) {
+        console.warn("Unable to parse final Azure OpenAI stream event:", error.message);
       }
     }
 
@@ -109,7 +155,14 @@ ${dishes.join("、")}
     res.end();
   } catch (err) {
     console.error("Azure OpenAI error:", err.message);
-    res.status(500).json({ error: "AI 服务调用失败，请检查配置" });
+    if (res.headersSent) {
+      res.write(`data: ${JSON.stringify({ error: "AI 服务调用中断，请重试" })}\n\n`);
+      res.end();
+    } else {
+      res.status(500).json({ error: "AI 服务调用失败，请检查配置" });
+    }
+  } finally {
+    clearTimeout(timeout);
   }
 });
 
