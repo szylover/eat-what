@@ -5,6 +5,7 @@ let currentDishes = [];  // [{name, time, source}]
 let currentSoups = [];
 let lockedDishes = {};   // index -> dish object
 let lockedSoups = {};
+let tasteProfile = null;
 
 // ===== DOM helpers =====
 const $ = (id) => document.getElementById(id);
@@ -24,7 +25,7 @@ function getActiveMenu() {
     const merged = Object.fromEntries(categories.map(c => [c, []]));
     for (const [src, menu] of Object.entries(MENU_DB)) {
       for (const cat of categories) {
-        merged[cat].push(...menu[cat].map(d => ({ ...d, source: src })));
+        merged[cat].push(...prioritizeDishes(menu[cat].map(d => ({ ...d, source: src }))));
       }
     }
     return merged;
@@ -35,10 +36,37 @@ function getActiveMenu() {
     const menu = MENU_DB[src];
     if (!menu) continue;
     for (const cat of categories) {
-      merged[cat].push(...menu[cat].map(d => ({ ...d, source: src })));
+      merged[cat].push(...prioritizeDishes(menu[cat].map(d => ({ ...d, source: src }))));
     }
   }
   return merged;
+}
+
+function prioritizeDishes(dishes) {
+  if (!tasteProfile) return dishes;
+  const isWeekend = [0, 6].includes(new Date().getDay());
+  const eligible = dishes.filter((dish) => {
+    if (tasteProfile.excludeDishes.includes(dish.name)) return false;
+    if (tasteProfile.excludeKeywords.some((keyword) => dish.name.includes(keyword))) return false;
+    if (tasteProfile.restaurantOnlyDishes.includes(dish.name)) return false;
+    return isWeekend || !tasteProfile.weekendComplexDishes.includes(dish.name);
+  });
+  const weighted = eligible.flatMap((dish) => {
+    const score = tasteProfile.ratings[dish.name] ?? 5;
+    const weight = score >= 9 ? 5 : score >= 8 ? 4 : score >= 7 ? 2 : 1;
+    return Array.from({ length: weight }, () => dish);
+  });
+  return weighted.length > 0 ? weighted : eligible;
+}
+
+async function loadTasteProfile() {
+  try {
+    const response = await fetch("/api/taste-profile");
+    if (!response.ok) return;
+    tasteProfile = await response.json();
+  } catch {
+    // Menu generation retains its unweighted fallback if the profile is unavailable.
+  }
 }
 
 function pickRandom(arr) {
@@ -357,6 +385,7 @@ function switchTab(tabName) {
 
 // ===== Event binding =====
 document.addEventListener('DOMContentLoaded', () => {
+  loadTasteProfile();
   // Tab switching
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => switchTab(tab.dataset.tab));

@@ -4,6 +4,7 @@ const CACHE_PREFIX = "weekly-planner-result-v1:";
 
 const questionContainer = document.getElementById("weeklyQuestion");
 const planContainer = document.getElementById("weeklyPlan");
+const tasteProfileContainer = document.getElementById("weeklyTasteProfile");
 let state = loadDraft();
 
 function loadDraft() {
@@ -46,6 +47,28 @@ async function request(body) {
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || `请求失败 (${response.status})`);
   return data;
+}
+
+async function loadTasteProfile() {
+  try {
+    const response = await fetch("/api/taste-profile");
+    if (!response.ok) return;
+    const profile = await response.json();
+    renderTasteProfile(profile);
+  } catch {
+    // The planner remains available if the optional profile summary cannot load.
+  }
+}
+
+function renderTasteProfile(profile) {
+  tasteProfileContainer.hidden = false;
+  tasteProfileContainer.replaceChildren(
+    createElement("strong", `🍽️ 当前画像：${profile.profileName}`),
+    createElement("p", `在家主力：${profile.homeCoreDishes.slice(0, 6).join("、")}等`, "weekly-question-hint"),
+    createElement("p", `餐厅收藏：${profile.restaurantFavorites.slice(0, 4).join("、")}等（不默认排入在家菜单）`, "weekly-question-hint"),
+    createElement("p", `排除：${[...profile.excludeDishes, ...profile.excludeKeywords].join("、")}`, "weekly-question-hint"),
+    createElement("p", "工作日优先快手高分菜；螃蟹、海鲜饭等复杂菜自动留给周末。", "weekly-question-hint")
+  );
 }
 
 async function loadNextQuestion() {
@@ -224,6 +247,7 @@ function renderPlanActions() {
     const profile = readStorage(PROFILE_KEY, {});
     state = { answers: profile, question: null, plan: null, usage: null };
     saveDraft();
+    loadTasteProfile();
     loadNextQuestion();
   });
   actions.append(saveProfile, download, exportPdf, restart);

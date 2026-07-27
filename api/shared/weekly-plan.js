@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const TASTE_PROFILE = require("./taste-profile.json");
 
 const QUESTIONS = [
   {
@@ -56,6 +57,16 @@ const SYSTEM_PROMPT = `你是严谨的中国家庭一周饮食规划助手。只
 - 合并采购数量，避免同一食材重复购买；所有数量按用户人数写清楚。
 - 输出有效 JSON，不要 Markdown，不要代码块，不要额外文字。`;
 
+const TASTE_PROFILE_PROMPT = `已确认的长期口味画像：
+- 在家工作日核心菜：${TASTE_PROFILE.homeCoreDishes.join("、")}。
+- 餐厅/外卖收藏：${TASTE_PROFILE.restaurantFavorites.join("、")}；除非用户明确说要点餐、当天购买刺身或做周末复杂菜，否则不要把它们排入在家菜单。
+- 高优先级菜：${TASTE_PROFILE.highPriorityDishes.join("、")}。
+- 排除菜或食材：${[...TASTE_PROFILE.excludeDishes, ...TASTE_PROFILE.excludeKeywords].join("、")}；绝不可推荐。
+- 周末复杂菜：${TASTE_PROFILE.weekendComplexDishes.join("、")}；工作日不要安排这些高劳动量菜。
+- 清淡基准：${TASTE_PROFILE.sharedMealRules.mildBaseline}
+- 分流规则：${TASTE_PROFILE.sharedMealRules.spicySplit}
+除非用户本轮明确提出相反要求，否则优先使用在家核心和高优先级菜，避免只用低分菜凑数。`;
+
 class WeeklyPlanError extends Error {
   constructor(status, message) {
     super(message);
@@ -103,7 +114,7 @@ function hasAnswer(value) {
 
 function buildCacheKey(answers) {
   return crypto.createHash("sha256")
-    .update(JSON.stringify({ schemaVersion: 1, answers }))
+    .update(JSON.stringify({ schemaVersion: 1, tasteProfileVersion: TASTE_PROFILE.version, answers }))
     .digest("hex");
 }
 
@@ -198,7 +209,7 @@ ${JSON.stringify(normalizedAnswers)}
       headers: { "Content-Type": "application/json", "api-key": apiKey },
       body: JSON.stringify({
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: `${SYSTEM_PROMPT}\n\n${TASTE_PROFILE_PROMPT}` },
           { role: "user", content: userPrompt },
         ],
         ...(isLegacyModel

@@ -369,6 +369,21 @@ button:hover {
   margin-top: 8px;
 }
 
+.weekly-taste-profile {
+  background: #fff8e1;
+  border-left: 4px solid #dda15e;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+}
+
+.weekly-taste-profile p {
+  color: #665;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 4px 0 0;
+}
+
 .weekly-question-title,
 .weekly-plan-title {
   color: #1d3557;

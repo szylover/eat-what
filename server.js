@@ -2,12 +2,18 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const { handleWeeklyPlan, WeeklyPlanError } = require("./api/shared/weekly-plan");
+const tasteProfile = require("./api/shared/taste-profile.json");
 
 const app = express();
 app.use(express.json());
 
 // 提供 src/ 下的静态文件
 app.use(express.static(path.join(__dirname, "src")));
+
+app.get("/api/taste-profile", (_req, res) => {
+  res.set("Cache-Control", "public, max-age=3600");
+  res.json(tasteProfile);
+});
 
 app.post("/api/weekly-plan", async (req, res) => {
   try {
