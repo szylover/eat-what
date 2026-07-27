@@ -342,6 +342,122 @@ button:hover {
   background: none;
 }
 
+/* ===== Weekly Planner ===== */
+.weekly-intro {
+  background: #f1faee;
+  border-left: 4px solid #2a9d8f;
+  border-radius: 8px;
+  color: #1d3557;
+  margin-bottom: 16px;
+  padding: 12px;
+}
+
+.weekly-intro p,
+.weekly-question-hint,
+.weekly-plan-overview {
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 6px 0 0;
+}
+
+.weekly-question-title,
+.weekly-plan-title {
+  color: #1d3557;
+  font-size: 1.15rem;
+  margin: 12px 0 4px;
+}
+
+.weekly-question-form textarea {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 16px;
+  margin-top: 12px;
+  min-height: 110px;
+  padding: 10px;
+  resize: vertical;
+  width: 100%;
+}
+
+.weekly-question-form input {
+  display: block;
+  margin: 12px 0;
+}
+
+.weekly-generate {
+  background: #2a9d8f;
+}
+
+.weekly-generate:hover {
+  background: #21867a;
+}
+
+.weekly-reset {
+  display: block;
+  margin: 16px auto 0;
+}
+
+.weekly-plan-section {
+  border-top: 1px dashed #ddd;
+  margin-top: 18px;
+  padding-top: 12px;
+}
+
+.weekly-plan-section h3 {
+  color: #1d3557;
+  font-size: 1rem;
+  margin: 0 0 8px;
+}
+
+.weekly-plan-list {
+  display: grid;
+  gap: 8px;
+}
+
+.weekly-plan-list article {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.weekly-plan-list p {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 3px 0;
+}
+
+.weekly-plan-list strong {
+  color: #457b9d;
+}
+
+.weekly-plan-section ul {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.weekly-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.weekly-action {
+  flex: 1;
+  min-width: 110px;
+  padding: 8px 10px;
+}
+
+.weekly-cache-note {
+  color: #777;
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  margin: 0;
+}
+
 .tab-content {
   display: none;
 }

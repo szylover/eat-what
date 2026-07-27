@@ -1,12 +1,25 @@
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
+const { handleWeeklyPlan, WeeklyPlanError } = require("./api/shared/weekly-plan");
 
 const app = express();
 app.use(express.json());
 
 // 提供 src/ 下的静态文件
 app.use(express.static(path.join(__dirname, "src")));
+
+app.post("/api/weekly-plan", async (req, res) => {
+  try {
+    const result = await handleWeeklyPlan(req.body || {}, process.env);
+    res.json(result);
+  } catch (error) {
+    const status = error instanceof WeeklyPlanError ? error.status : 500;
+    const message = error instanceof WeeklyPlanError ? error.message : "周计划服务异常";
+    console.error("weekly-plan error:", message);
+    res.status(status).json({ error: message });
+  }
+});
 
 function normalizeMenuItems(items, label) {
   if (!Array.isArray(items) || items.length > 12) {

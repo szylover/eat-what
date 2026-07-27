@@ -15,6 +15,7 @@
   <div class="tabs">
     <button class="tab active" data-tab="food">🍳 今天吃什么</button>
     <button class="tab" data-tab="tea">🧁 奶茶抽签</button>
+    <button class="tab" data-tab="week">📅 这周吃什么</button>
   </div>
 
   <!-- ===== 吃饭 Tab ===== -->
@@ -78,8 +79,19 @@
       <div id="teaAiResult"></div>
     </div>
   </div>
+
+  <!-- ===== 周计划 Agent Tab ===== -->
+  <div class="tab-content" id="tab-week">
+    <div class="weekly-intro">
+      <strong>📅 一周吃什么 Agent</strong>
+      <p>一次只问一个关键问题。填完后生成可编辑的菜单、采购和预处理计划。</p>
+    </div>
+    <div id="weeklyQuestion"></div>
+    <div id="weeklyPlan" hidden></div>
+  </div>
 </div>
 
 <script type="module" src="js/app.js"></script>
+<script type="module" src="js/weekly-planner.js"></script>
 </body>
 </html>
