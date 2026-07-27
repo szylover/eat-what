@@ -214,6 +214,10 @@ function renderPlanActions() {
   download.className = "chip-btn weekly-action";
   download.addEventListener("click", downloadMarkdown);
 
+  const exportPdf = createElement("button", "导出 PDF");
+  exportPdf.className = "chip-btn weekly-action";
+  exportPdf.addEventListener("click", exportPdfFromPrintView);
+
   const restart = createElement("button", "重新做一周");
   restart.className = "chip-btn weekly-action";
   restart.addEventListener("click", () => {
@@ -222,7 +226,7 @@ function renderPlanActions() {
     saveDraft();
     loadNextQuestion();
   });
-  actions.append(saveProfile, download, restart);
+  actions.append(saveProfile, download, exportPdf, restart);
 
   if (state.usage?.cachedTokens !== null && state.usage?.cachedTokens !== undefined) {
     actions.append(createElement("p", `模型 KV 缓存命中：${state.usage.cachedTokens} tokens`, "weekly-cache-note"));
@@ -241,6 +245,72 @@ function downloadMarkdown() {
   link.download = "一周吃什么计划.md";
   link.click();
   URL.revokeObjectURL(url);
+}
+
+function exportPdfFromPrintView() {
+  const printWindow = window.open("", "_blank", "noopener,noreferrer");
+  if (!printWindow) {
+    alert("浏览器拦截了打印窗口，请允许弹窗后重试。");
+    return;
+  }
+
+  printWindow.document.write(printablePlanDocument(state.plan));
+  printWindow.document.close();
+  printWindow.addEventListener("load", () => {
+    printWindow.focus();
+    printWindow.print();
+  }, { once: true });
+}
+
+function printablePlanDocument(plan) {
+  const section = (title, items, fields) => `
+    <section>
+      <h2>${escapeHtml(title)}</h2>
+      ${items.map((item) => `<article>${fields.map((field) => {
+        const value = item[field];
+        return value ? `<p><strong>${escapeHtml(fieldLabel(field))}：</strong>${escapeHtml(value)}</p>` : "";
+      }).join("")}</article>`).join("")}
+    </section>`;
+  return `<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>${escapeHtml(plan.title)}</title>
+<style>
+  @page { size: A4; margin: 11mm; }
+  * { box-sizing: border-box; }
+  body { color: #111; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; font-size: 10pt; line-height: 1.4; margin: 0; }
+  h1 { border-bottom: 2px solid #111; font-size: 20pt; margin: 0 0 5pt; padding-bottom: 5pt; }
+  h2 { border-bottom: 1px solid #555; break-after: avoid; font-size: 13pt; margin: 13pt 0 5pt; padding-bottom: 2pt; }
+  p { margin: 2pt 0; }
+  .overview { color: #444; margin-bottom: 8pt; }
+  article { background: #f7f7f7; break-inside: avoid; border-radius: 4pt; margin: 4pt 0; padding: 5pt 7pt; }
+  ul { margin: 3pt 0; padding-left: 18pt; }
+  li { break-inside: avoid; margin: 2pt 0; }
+  .hint { color: #555; font-size: 9pt; margin-top: 14pt; }
+  @media print { .hint { display: none; } }
+</style>
+</head>
+<body>
+  <h1>${escapeHtml(plan.title)}</h1>
+  <p class="overview">${escapeHtml(plan.overview)}</p>
+  ${section("晚餐安排", plan.days, ["label", "dish", "minutes", "prep", "split"])}
+  ${section("采购清单", plan.shopping, ["category", "item", "quantity", "storage"])}
+  ${section("统一预处理", plan.prep, ["step", "duration", "storage"])}
+  ${section("两分钟早餐", plan.breakfast, ["name", "portion", "reheat"])}
+  <section><h2>食安与保存</h2><ul>${plan.safetyNotes.map((note) => `<li>${escapeHtml(note)}</li>`).join("")}</ul></section>
+  <p class="hint">在系统打印窗口中选择“另存为 PDF”或“保存为 PDF”即可下载。</p>
+</body>
+</html>`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function planToMarkdown(plan) {
