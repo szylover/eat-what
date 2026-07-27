@@ -52,11 +52,19 @@ function prioritizeDishes(dishes) {
     return isWeekend || !tasteProfile.weekendComplexDishes.includes(dish.name);
   });
   const weighted = eligible.flatMap((dish) => {
-    const score = tasteProfile.ratings[dish.name] ?? 5;
+    const score = combinedScore(dish.name);
     const weight = score >= 9 ? 5 : score >= 8 ? 4 : score >= 7 ? 2 : 1;
     return Array.from({ length: weight }, () => dish);
   });
   return weighted.length > 0 ? weighted : eligible;
+}
+
+function combinedScore(dishName) {
+  const primaryScore = tasteProfile.ratings[dishName] ?? 5;
+  const mildBoost = tasteProfile.mildProfile.mildDishNames.includes(dishName)
+    ? tasteProfile.mildProfile.scoreBoost
+    : 0;
+  return primaryScore + mildBoost;
 }
 
 async function loadTasteProfile() {

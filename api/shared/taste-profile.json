@@ -18,10 +18,11 @@
     "avoidFattyMeat": true
   },
   "mildProfile": {
-    "confirmedFavorites": ["椰子鸡", "姜葱鸡腿"],
-    "ratings": {"椰子鸡": 10, "姜葱鸡腿": 7.5},
+    "confirmedFavorites": ["椰子鸡", "虾仁滑蛋", "姜葱鸡腿", "清蒸鲈鱼"],
+    "anchorRatings": {"椰子鸡": 10, "虾仁滑蛋": 8, "姜葱鸡腿": 7.5, "清蒸鲈鱼": 7},
     "style": "低辣、少油、椰子鸡式清淡鲜味、偏中式清爽饭菜",
-    "mealTemplates": ["椰子鸡配冬瓜娃娃菜", "姜葱鸡腿配冬瓜"],
+    "scoreBoost": 1.5,
+    "mildDishNames": ["清蒸鲈鱼", "清蒸石斑鱼", "白灼虾", "蒸水蛋", "白切鸡", "姜葱鸡腿", "虾仁滑蛋", "椰子鸡"],
     "weeklyMinimum": 3
   },
   "scheduleRules": {

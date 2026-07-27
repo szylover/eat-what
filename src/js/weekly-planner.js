@@ -66,7 +66,7 @@ function renderTasteProfile(profile) {
     createElement("strong", `🍽️ 当前画像：${profile.profileName}`),
     createElement("p", `在家主力：${profile.homeCoreDishes.slice(0, 6).join("、")}等`, "weekly-question-hint"),
     createElement("p", `餐厅收藏：${profile.restaurantFavorites.slice(0, 4).join("、")}等（不默认排入在家菜单）`, "weekly-question-hint"),
-    createElement("p", `清淡基准：${profile.mildProfile.confirmedFavorites.join("、")}；每周至少 ${profile.mildProfile.weeklyMinimum} 顿清淡主菜`, "weekly-question-hint"),
+    createElement("p", `清淡池：${profile.mildProfile.confirmedFavorites.join("、")}；清淡菜权重 +${profile.mildProfile.scoreBoost}，每周至少 ${profile.mildProfile.weeklyMinimum} 顿`, "weekly-question-hint"),
     createElement("p", `排除：${[...profile.excludeDishes, ...profile.excludeKeywords].join("、")}`, "weekly-question-hint"),
     createElement("p", "工作日优先快手高分菜；螃蟹、海鲜饭等复杂菜自动留给周末。", "weekly-question-hint")
   );
