@@ -361,6 +361,14 @@ button:hover {
   margin: 6px 0 0;
 }
 
+.weekly-pdf-link {
+  color: #1d3557;
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
 .weekly-question-title,
 .weekly-plan-title {
   color: #1d3557;
