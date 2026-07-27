@@ -1,11 +1,12 @@
-const DRAFT_KEY = "weekly-planner-draft-v1";
+const DRAFT_KEY = "weekly-planner-draft-v2";
 const PROFILE_KEY = "weekly-planner-profile-v1";
-const CACHE_PREFIX = "weekly-planner-result-v1:";
+const CACHE_PREFIX = "weekly-planner-result-v2:";
 
 const questionContainer = document.getElementById("weeklyQuestion");
 const planContainer = document.getElementById("weeklyPlan");
 const tasteProfileContainer = document.getElementById("weeklyTasteProfile");
 let state = loadDraft();
+let householdDefaults = {};
 
 function loadDraft() {
   const profile = readStorage(PROFILE_KEY, {});
@@ -54,6 +55,9 @@ async function loadTasteProfile() {
     const response = await fetch("/api/taste-profile");
     if (!response.ok) return;
     const profile = await response.json();
+    householdDefaults = profile.householdDefaults;
+    state.answers = { ...householdDefaults, ...state.answers };
+    saveDraft();
     renderTasteProfile(profile);
   } catch {
     // The planner remains available if the optional profile summary cannot load.
@@ -67,6 +71,7 @@ function renderTasteProfile(profile) {
     createElement("p", `在家主力：${profile.homeCoreDishes.slice(0, 6).join("、")}等`, "weekly-question-hint"),
     createElement("p", `餐厅收藏：${profile.restaurantFavorites.slice(0, 4).join("、")}等（不默认排入在家菜单）`, "weekly-question-hint"),
     createElement("p", `清淡池：${profile.mildProfile.confirmedFavorites.join("、")}；清淡菜权重 +${profile.mildProfile.scoreBoost}，每周至少 ${profile.mildProfile.weeklyMinimum} 顿`, "weekly-question-hint"),
+    createElement("p", `每晚结构：${profile.householdDefaults.mealStructure}`, "weekly-question-hint"),
     createElement("p", `排除：${[...profile.excludeDishes, ...profile.excludeKeywords].join("、")}`, "weekly-question-hint"),
     createElement("p", "工作日优先快手高分菜；螃蟹、海鲜饭等复杂菜自动留给周末。", "weekly-question-hint")
   );
@@ -173,7 +178,7 @@ function renderPlan() {
   planContainer.replaceChildren(
     createElement("h2", plan.title, "weekly-plan-title"),
     createElement("p", plan.overview, "weekly-plan-overview"),
-    renderSection("晚餐安排", plan.days, ["label", "dish", "minutes", "prep", "split"]),
+    renderSection("晚餐安排", plan.days, ["label", "meatDish", "vegetableDish", "semiMeatDish", "soup", "minutes", "prep", "split"]),
     renderSection("采购清单", plan.shopping, ["category", "item", "quantity", "storage"]),
     renderSection("统一预处理", plan.prep, ["step", "duration", "storage"]),
     renderSection("两分钟早餐", plan.breakfast, ["name", "portion", "reheat"]),
@@ -216,7 +221,8 @@ function renderBulletSection(title, items) {
 
 function fieldLabel(field) {
   return {
-    label: "餐次", dish: "吃什么", minutes: "耗时", prep: "提前准备", split: "口味分流",
+    label: "餐次", meatDish: "荤菜", vegetableDish: "素菜", semiMeatDish: "半荤", soup: "汤",
+    minutes: "耗时", prep: "提前准备", split: "口味分流",
     category: "分类", item: "食材", quantity: "数量", storage: "保存",
     step: "步骤", duration: "耗时", name: "早餐", portion: "份量", reheat: "复热",
   }[field] || field;
@@ -246,10 +252,9 @@ function renderPlanActions() {
   restart.className = "chip-btn weekly-action";
   restart.addEventListener("click", () => {
     const profile = readStorage(PROFILE_KEY, {});
-    state = { answers: profile, question: null, plan: null, usage: null };
+    state = { answers: { ...householdDefaults, ...profile }, question: null, plan: null, usage: null };
     saveDraft();
-    loadTasteProfile();
-    loadNextQuestion();
+    loadTasteProfile().finally(loadNextQuestion);
   });
   actions.append(saveProfile, download, exportPdf, restart);
 
@@ -319,7 +324,7 @@ function printablePlanDocument(plan) {
 <body>
   <h1>${escapeHtml(plan.title)}</h1>
   <p class="overview">${escapeHtml(plan.overview)}</p>
-  ${section("晚餐安排", plan.days, ["label", "dish", "minutes", "prep", "split"])}
+  ${section("晚餐安排", plan.days, ["label", "meatDish", "vegetableDish", "semiMeatDish", "soup", "minutes", "prep", "split"])}
   ${section("采购清单", plan.shopping, ["category", "item", "quantity", "storage"])}
   ${section("统一预处理", plan.prep, ["step", "duration", "storage"])}
   ${section("两分钟早餐", plan.breakfast, ["name", "portion", "reheat"])}
@@ -349,7 +354,7 @@ function planToMarkdown(plan) {
     "",
     plan.overview,
     "",
-    ...section("晚餐安排", plan.days, ["label", "dish", "minutes", "prep", "split"]),
+    ...section("晚餐安排", plan.days, ["label", "meatDish", "vegetableDish", "semiMeatDish", "soup", "minutes", "prep", "split"]),
     ...section("采购清单", plan.shopping, ["category", "item", "quantity", "storage"]),
     ...section("统一预处理", plan.prep, ["step", "duration", "storage"]),
     ...section("两分钟早餐", plan.breakfast, ["name", "portion", "reheat"]),
@@ -364,7 +369,7 @@ function createResetButton() {
   reset.type = "button";
   reset.className = "chip-btn weekly-reset";
   reset.addEventListener("click", () => {
-    state = { answers: {}, question: null, plan: null, usage: null };
+    state = { answers: householdDefaults, question: null, plan: null, usage: null };
     saveDraft();
     loadNextQuestion();
   });

@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "updatedAt": "2026-07-27",
   "profileName": "重口鲜味与清淡基底双轨画像",
   "restaurantFavorites": [
@@ -190,6 +190,15 @@
     "scoreBoost": 1.5,
     "mildDishNames": ["清蒸鲈鱼", "清蒸石斑鱼", "白灼虾", "蒸水蛋", "白切鸡", "姜葱鸡腿", "虾仁滑蛋", "椰子鸡"],
     "weeklyMinimum": 3
+  },
+  "householdDefaults": {
+    "people": 2,
+    "preferences": "两人都不爱肥肉；清淡口味不吃辣，重口口味偏好辣味和鲜味；共同排除西蓝花、日式炒乌冬、意大利肉酱面、冷奴。",
+    "mildPreferences": "椰子鸡、虾仁滑蛋、姜葱鸡腿、清蒸鲈鱼；低辣、少油、偏中式清爽饭菜。",
+    "mealStructure": "每晚固定一荤一素一半荤一汤；半荤可用鸡蛋、豆腐、虾仁、菌菇或其他轻蛋白组合。",
+    "time": "工作日 15-30 分钟；复杂菜留周末。",
+    "equipment": "燃气灶、电饭锅、烤箱、微波炉、高压锅、喷火枪。",
+    "shopping": "冷冻蛋白可多备并按单餐分装；叶菜和刺身当天购买；牛排前一晚冷藏解冻。"
   },
   "scheduleRules": {
     "weekdayMinutes": 30,

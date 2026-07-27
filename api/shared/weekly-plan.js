@@ -33,6 +33,13 @@ const QUESTIONS = [
     placeholder: "例如：椰子鸡、清蒸鱼、姜葱鸡、牛排、蒸蛋",
   },
   {
+    id: "mealStructure",
+    title: "一顿饭通常怎么配？",
+    hint: "默认使用已保存的家庭结构；只有本周有变化时才修改。",
+    kind: "textarea",
+    placeholder: "例如：一荤一素一半荤一汤",
+  },
+  {
     id: "time",
     title: "工作日和周末各能花多久做饭？",
     hint: "告诉我快手餐的上限，以及是否留复杂菜给周末。",
@@ -87,14 +94,22 @@ function getNextQuestion(answers) {
   return index === -1 ? null : QUESTIONS[index];
 }
 
+function withHouseholdDefaults(rawAnswers) {
+  const suppliedAnswers = rawAnswers && typeof rawAnswers === "object" && !Array.isArray(rawAnswers)
+    ? rawAnswers
+    : {};
+  return { ...TASTE_PROFILE.householdDefaults, ...suppliedAnswers };
+}
+
 function validateAnswers(rawAnswers) {
   if (!rawAnswers || typeof rawAnswers !== "object" || Array.isArray(rawAnswers)) {
     throw new WeeklyPlanError(400, "answers 必须是对象");
   }
 
   const answers = {};
+  const mergedAnswers = withHouseholdDefaults(rawAnswers);
   for (const question of QUESTIONS) {
-    const value = rawAnswers[question.id];
+    const value = mergedAnswers[question.id];
     if (question.kind === "number") {
       const number = Number(value);
       if (!Number.isInteger(number) || number < question.min || number > question.max) {
@@ -144,7 +159,7 @@ function normalizePlan(rawPlan) {
   return {
     title: rawPlan.title.trim().slice(0, 100),
     overview: readText(rawPlan.overview, "本周菜单会按你的库存、口味和时间安排。"),
-    days: normalizeItems(rawPlan.days, ["label", "dish", "minutes", "prep", "split"]),
+    days: normalizeItems(rawPlan.days, ["label", "meatDish", "vegetableDish", "semiMeatDish", "soup", "minutes", "prep", "split"]),
     shopping: normalizeItems(rawPlan.shopping, ["category", "item", "quantity", "storage"]),
     prep: normalizeItems(rawPlan.prep, ["step", "duration", "storage"]),
     breakfast: normalizeItems(rawPlan.breakfast, ["name", "portion", "reheat"]),
@@ -199,11 +214,11 @@ async function generateWeeklyPlan(answers, env, fetchImplementation = fetch) {
 用户问答：
 ${JSON.stringify(normalizedAnswers)}
 
-严格返回这个 JSON 结构：
+每天都必须完整提供一荤一素一半荤一汤；不要将一道菜拆成多个字段凑数。严格返回这个 JSON 结构：
 {
   "title": "string",
   "overview": "string",
-  "days": [{"label":"string","dish":"string","minutes":"string","prep":"string","split":"string"}],
+  "days": [{"label":"string","meatDish":"string","vegetableDish":"string","semiMeatDish":"string","soup":"string","minutes":"string","prep":"string","split":"string"}],
   "shopping": [{"category":"string","item":"string","quantity":"string","storage":"string"}],
   "prep": [{"step":"string","duration":"string","storage":"string"}],
   "breakfast": [{"name":"string","portion":"string","reheat":"string"}],
@@ -265,7 +280,7 @@ ${JSON.stringify(normalizedAnswers)}
 async function handleWeeklyPlan(body, env, fetchImplementation) {
   const action = body?.action;
   if (action === "next") {
-    const answers = body.answers && typeof body.answers === "object" ? body.answers : {};
+    const answers = withHouseholdDefaults(body.answers);
     return { question: getNextQuestion(answers), complete: getNextQuestion(answers) === null };
   }
   if (action === "generate") {
