@@ -17,6 +17,13 @@
     "spicySplit": "先完成清淡原味基底，再以辣椒、辣油、花椒或重口酱汁后置收尾。",
     "avoidFattyMeat": true
   },
+  "mildProfile": {
+    "confirmedFavorites": ["椰子鸡", "姜葱鸡腿"],
+    "ratings": {"椰子鸡": 10, "姜葱鸡腿": 7.5},
+    "style": "低辣、少油、椰子鸡式清淡鲜味、偏中式清爽饭菜",
+    "mealTemplates": ["椰子鸡配冬瓜娃娃菜", "姜葱鸡腿配冬瓜"],
+    "weeklyMinimum": 3
+  },
   "scheduleRules": {
     "weekdayMinutes": 30,
     "weekendComplexOnly": true,

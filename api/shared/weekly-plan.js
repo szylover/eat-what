@@ -26,6 +26,13 @@ const QUESTIONS = [
     placeholder: "例如：两人都不爱肥肉；一人不吃辣，另一人爱重口",
   },
   {
+    id: "mildPreferences",
+    title: "清淡口味最愿意吃哪些主菜？",
+    hint: "请列出低辣/不辣的一方真正喜欢的菜，不要只写“少放辣”。",
+    kind: "textarea",
+    placeholder: "例如：椰子鸡、清蒸鱼、姜葱鸡、牛排、蒸蛋",
+  },
+  {
     id: "time",
     title: "工作日和周末各能花多久做饭？",
     hint: "告诉我快手餐的上限，以及是否留复杂菜给周末。",
@@ -65,6 +72,7 @@ const TASTE_PROFILE_PROMPT = `已确认的长期口味画像：
 - 周末复杂菜：${TASTE_PROFILE.weekendComplexDishes.join("、")}；工作日不要安排这些高劳动量菜。
 - 清淡基准：${TASTE_PROFILE.sharedMealRules.mildBaseline}
 - 分流规则：${TASTE_PROFILE.sharedMealRules.spicySplit}
+- 已确认清淡偏好：${TASTE_PROFILE.mildProfile.confirmedFavorites.join("、")}；风格为${TASTE_PROFILE.mildProfile.style}。每周至少 ${TASTE_PROFILE.mildProfile.weeklyMinimum} 顿从清淡主菜出发，不得用重口菜简单减辣替代。
 除非用户本轮明确提出相反要求，否则优先使用在家核心和高优先级菜，避免只用低分菜凑数。`;
 
 class WeeklyPlanError extends Error {
@@ -114,7 +122,7 @@ function hasAnswer(value) {
 
 function buildCacheKey(answers) {
   return crypto.createHash("sha256")
-    .update(JSON.stringify({ schemaVersion: 1, tasteProfileVersion: TASTE_PROFILE.version, answers }))
+    .update(JSON.stringify({ schemaVersion: 2, tasteProfileVersion: TASTE_PROFILE.version, answers }))
     .digest("hex");
 }
 
